@@ -37,33 +37,36 @@ repository:
 		patterns: [{
 			# @days[3, 4, 5]
 			name: "meta.slice.array.perl"
-			begin: "((@)\\w+)(\\[)"
+			begin: "((@)((?:\\w|::)+)|(?<=}|\\]))(\\[)"
 			end:   "]"
 			beginCaptures:
 				1: name: "variable.other.array.list.perl"
 				2: name: "punctuation.definition.variable.array.sigil.perl"
-				3: name: "punctuation.definition.array.slice.begin.perl"
+				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				4: name: "punctuation.definition.array.slice.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.array.slice.end.perl"
 			patterns: [include: "#variableInnards"]
 		},{
 			# @days{"Jan","Feb"}
 			name:  "meta.slice.hash.perl"
-			begin: "((@)\\w+)({)"
+			begin: "((@)((?:\\w|::)+)|(?<=}|\\]))({)"
 			end:   "}"
 			beginCaptures:
 				1: name: "variable.other.array.list.perl"
 				2: name: "punctuation.definition.variable.array.sigil.perl"
-				3: name: "punctuation.definition.array.slice.begin.perl"
+				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				4: name: "punctuation.definition.array.slice.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.array.slice.end.perl"
 			patterns: [include: "#variableInnards"]
 		},{
 			# @array
 			name: "variable.other.array.list.perl"
-			match: "(@)\\w+"
+			match: "(@)((?:\\w|::)+)"
 			captures:
 				1: name: "punctuation.definition.variable.array.sigil.perl"
+				2: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
 		}]
 	
 	comment:
@@ -77,9 +80,10 @@ repository:
 	# %hash_terms
 	hash:
 		name: "variable.other.hash.perl"
-		match: "(%)\\w+"
+		match: "(%)((?:\\w|::)+)"
 		captures:
 			1: name: "punctuation.definition.variable.hash.sigil.perl"
+			2: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
 
 	
 	# $scalar_terms
@@ -87,10 +91,11 @@ repository:
 		patterns: [{
 			# $#array - Last index of @array
 			name: "variable.other.scalar.length.perl"
-			match: "(\\$)(#)\\w+"
+			match: "(\\$)(#)((?:\\w|::)+)"
 			captures:
 				1: name: "punctuation.definition.variable.scalar.sigil.perl"
 				2: name: "punctuation.definition.variable.length.perl"
+				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
 		},{
 			# ${scalar}
 			name: "meta.scalar.reference.perl"
@@ -105,43 +110,36 @@ repository:
 		},{
 			# $hash{key}
 			name:  "meta.access.hash.perl"
-			begin: "((\\$)\\w+)({)"
+			begin: "((\\$)((?:\\w|::)+)|(?<=}|\\]))({)"
 			end:   "}"
 			beginCaptures:
 				1: name: "variable.other.scalar.hash-item.perl"
 				2: name: "punctuation.definition.variable.scalar.sigil.perl"
-				3: name: "punctuation.definition.access.hash.begin.perl"
+				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				4: name: "punctuation.definition.access.hash.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.access.hash.end.perl"
 			patterns: [include: "#variableInnards"]
 		},{
 			# $array[index]
 			name: "meta.access.array.perl"
-			begin: "((\\$)\\w+)(\\[)"
+			begin: "((\\$)((?:\\w|::)+)|(?<=}|\\]))(\\[)"
 			end:   "]"
 			beginCaptures:
 				1: name: "variable.other.scalar.array-item.perl"
 				2: name: "punctuation.definition.variable.scalar.sigil.perl"
-				3: name: "punctuation.definition.array.access.begin.perl"
+				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				4: name: "punctuation.definition.array.access.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.array.access.end.perl"
 			patterns: [include: "#variableInnards"]
 		},{
-			# $qualified::scalar::reference
-			name:  "variable.other.scalar.qualified.perl"
-			match: "(\\$)\\w+((?:::\\w+)+)"
-			captures:
-				1: name: "punctuation.definition.variable.scalar.sigil.perl"
-				2: patterns: [{
-					match: "::"
-					name: "punctuation.separator.double-colon.perl"
-				}]
-		},{
 			# $scalar
 			name: "variable.other.scalar.perl"
-			match: "(\\$)\\w+"
+			match: "(\\$)((?:\\w|::)+)"
 			captures:
 				1: name: "punctuation.definition.variable.scalar.sigil.perl"
+				2: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
 		}]
 
 
@@ -155,6 +153,6 @@ repository:
 	# Patterns used inside stuff like ${scalar} or $hash{key}
 	variableInnards:
 		patterns: [{
-			name: "variable.other.scalar.braced.perl"
+			name: "variable.other.scalar.perl"
 			match: "\\w+"
 		}, include: "$self"]
