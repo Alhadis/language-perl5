@@ -31,6 +31,41 @@ patterns: [
 ]
 
 repository:
+	
+	# @array_terms
+	array:
+		patterns: [{
+			# @days[3, 4, 5]
+			name: "meta.slice.array.perl"
+			begin: "((@)\\w+)(\\[)"
+			end:   "]"
+			beginCaptures:
+				1: name: "variable.other.array.list.perl"
+				2: name: "punctuation.definition.variable.array.sigil.perl"
+				3: name: "punctuation.definition.array.slice.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.array.slice.end.perl"
+			patterns: [include: "#variableInnards"]
+		},{
+			# @days{"Jan","Feb"}
+			name:  "meta.slice.hash.perl"
+			begin: "((@)\\w+)({)"
+			end:   "}"
+			beginCaptures:
+				1: name: "variable.other.array.list.perl"
+				2: name: "punctuation.definition.variable.array.sigil.perl"
+				3: name: "punctuation.definition.array.slice.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.array.slice.end.perl"
+			patterns: [include: "#variableInnards"]
+		},{
+			# @array
+			name: "variable.other.array.list.perl"
+			match: "(@)\\w+"
+			captures:
+				1: name: "punctuation.definition.variable.array.sigil.perl"
+		}]
+	
 	comment:
 		name: "comment.line.number-sign.perl"
 		begin: "#"
@@ -38,23 +73,35 @@ repository:
 		beginCaptures:
 			0: name: "punctuation.definition.comment.perl"
 
+
+	# %hash_terms
+	hash:
+		name: "variable.other.hash.perl"
+		match: "(%)\\w+"
+		captures:
+			1: name: "punctuation.definition.variable.hash.sigil.perl"
+
 	
 	# $scalar_terms
 	scalar:
 		patterns: [{
 			# $#array - Last index of @array
 			name: "variable.other.scalar.length.perl"
-			match: "(\\$#)\\w+"
+			match: "(\\$)(#)\\w+"
 			captures:
-				1: name: "punctuation.definition.variable.length.perl"
+				1: name: "punctuation.definition.variable.scalar.sigil.perl"
+				2: name: "punctuation.definition.variable.length.perl"
 		},{
 			# ${scalar}
-			name: "meta.braced.scalar.perl"
-			begin: "\\${"
+			name: "meta.scalar.reference.perl"
+			begin: "(\\$)({)"
 			end:   "}"
-			beginCaptures: 0: name: "punctuation.definition.variable.scalar.begin.perl"
-			endCaptures:   0: name: "punctuation.definition.variable.scalar.end.perl"
-			patterns: [include: "#scalarInnards"]
+			beginCaptures:
+				1: name: "punctuation.definition.variable.scalar.sigil.perl"
+				2: name: "punctuation.definition.variable.scalar.name.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.variable.scalar.name.end.perl"
+			patterns: [include: "#variableInnards"]
 		},{
 			# $hash{key}
 			name:  "meta.access.hash.perl"
@@ -62,11 +109,11 @@ repository:
 			end:   "}"
 			beginCaptures:
 				1: name: "variable.other.scalar.hash-item.perl"
-				2: name: "punctuation.definition.variable.scalar.perl"
+				2: name: "punctuation.definition.variable.scalar.sigil.perl"
 				3: name: "punctuation.definition.access.hash.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.access.hash.end.perl"
-			patterns: [include: "#scalarInnards"]
+			patterns: [include: "#variableInnards"]
 		},{
 			# $array[index]
 			name: "meta.access.array.perl"
@@ -74,17 +121,17 @@ repository:
 			end:   "]"
 			beginCaptures:
 				1: name: "variable.other.scalar.array-item.perl"
-				2: name: "punctuation.definition.variable.scalar.perl"
-				3: name: "punctuation.definition.access.array.begin.perl"
+				2: name: "punctuation.definition.variable.scalar.sigil.perl"
+				3: name: "punctuation.definition.array.access.begin.perl"
 			endCaptures:
-				0: name: "punctuation.definition.access.array.end.perl"
-			patterns: [include: "#scalarInnards"]
+				0: name: "punctuation.definition.array.access.end.perl"
+			patterns: [include: "#variableInnards"]
 		},{
 			# $qualified::scalar::reference
 			name:  "variable.other.scalar.qualified.perl"
 			match: "(\\$)\\w+((?:::\\w+)+)"
 			captures:
-				1: name: "punctuation.definition.variable.scalar.perl"
+				1: name: "punctuation.definition.variable.scalar.sigil.perl"
 				2: patterns: [{
 					match: "::"
 					name: "punctuation.separator.double-colon.perl"
@@ -94,19 +141,20 @@ repository:
 			name: "variable.other.scalar.perl"
 			match: "(\\$)\\w+"
 			captures:
-				1: name: "punctuation.definition.variable.scalar.perl"
+				1: name: "punctuation.definition.variable.scalar.sigil.perl"
 		}]
-
-
-	# Patterns used inside stuff like ${scalar} or $hash{key}
-	scalarInnards:
-		patterns: [{
-			name: "variable.other.scalar.braced.perl"
-			match: "\\w+"
-		}, include: "$self"]
 
 
 	variables:
 		patterns: [
+			{include: "#array"}
+			{include: "#hash"}
 			{include: "#scalar"}
 		]
+
+	# Patterns used inside stuff like ${scalar} or $hash{key}
+	variableInnards:
+		patterns: [{
+			name: "variable.other.scalar.braced.perl"
+			match: "\\w+"
+		}, include: "$self"]
