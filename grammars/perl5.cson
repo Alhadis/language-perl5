@@ -1,0 +1,53 @@
+name: "Perl 5"
+scopeName: "source.perl.5"
+fileTypes: [
+	"pl"
+	"pm"
+	"pod"
+	"psgi"
+	"t"
+]
+firstLineMatch: """(?x)
+	# Hashbang
+	^\\#!.*(?:\\s|\\/|(?<=!)\\b)perl(?:$|\\s)
+	|
+	# Modeline
+	(?i:
+		# Emacs
+		-\\*-(?:(?:(?!mode\\s*:)[^:;]+:[^:;]+;)*\\s*mode\\s*:)?\\s*
+			perl
+		\\s*(?:;[^:;]+:[^:;]+?)*;?\\s*-\\*-
+		|
+		# Vim
+		(?:(?:\\s|^)vi(?:m[<=>]?\\d+|m)?|(?!^)\\sex)(?=:(?=\\s*set?\\s[^\\n:]+:)|:(?!\\s*set?\\s))(?:(?:\\s|\\s*:\\s*)\\w*(?:\\s*=(?:[^\\n\\\\\\s]|\\\\.)*)?)*[\\s:](?:filetype|ft|syntax)\\s*=
+			perl
+		(?=\\s|:|$)
+	)
+"""
+
+patterns: [
+	{include: "#comment"}
+	{include: "#variables"}
+]
+
+repository:
+	comment:
+		name: "comment.line.number-sign.perl"
+		begin: "#"
+		end:   "$"
+		beginCaptures:
+			0: name: "punctuation.definition.comment.perl"
+
+	variables:
+		patterns: [{
+			name: "variable.other.scalar.length.perl"
+			match: "(\\$#)\\w+"
+			captures:
+				1: name: "punctuation.definition.scalar.perl"
+		},{
+			name: "variable.other.scalar.perl"
+			match: "(\\$)\\w+"
+			captures:
+				1: name: "punctuation.definition.scalar.perl"
+		}]
+		
