@@ -28,6 +28,7 @@ firstLineMatch: """(?x)
 patterns: [
 	{include: "#comment"}
 	{include: "#variables"}
+	{include: "#literals"}
 ]
 
 repository:
@@ -85,6 +86,46 @@ repository:
 			1: name: "punctuation.definition.variable.hash.sigil.perl"
 			2: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
 
+
+	# Scalar literals
+	literals:
+		patterns: [
+			{include: "#number"}
+		]
+	
+	
+	# Numeric literals
+	number:
+		patterns: [{
+			# Floating point in scientific notation
+			name: "constant.numeric.float.decimal.exponential.perl"
+			match: "[-+]?(?!_)(?:[_0-9]+\\.[_0-9]*|\\.[_0-9]+)(?<!_)[Ee][-+]?(?!_)[_0-9]+(?<!_)"
+		},{
+			# Integer in scientific notation
+			name: "constant.numeric.integer.decimal.exponential.perl"
+			match: "[-+]?(?!_)[_0-9]+[Ee][-+]?(?!_)[_0-9]+(?<!_)"
+		},{
+			# Floating point
+			name: "constant.numeric.float.decimal.perl"
+			match: "[-+]?(?!_)(?:[_0-9]+\\.[_0-9]*|\\.[_0-9]+)(?<!_)"
+		},{
+			# Hexadecimal
+			name: "constant.numeric.integer.hexadecimal.perl"
+			match: "[-+]?0[xX](?!_)[A-Fa-f0-9_]*(?<!_)"
+		},{
+			# Binary
+			name: "constant.numeric.integer.binary.perl"
+			match: "[-+]?0[bB](?!_)[_01]*(?<!_)"
+		},{
+			# Octal
+			name: "constant.numeric.integer.octal.perl"
+			match: "[-+]?0(?!_)[_0-9]+(?<!_)"
+		},{
+			# Integer
+			name: "constant.numeric.integer.decimal.perl"
+			match: "[-+]?(?!_)[_0-9]+(?<!_)"
+		}]
+	
 	
 	# $scalar_terms
 	scalar:

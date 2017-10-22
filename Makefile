@@ -3,7 +3,6 @@ all: test
 # Assert tests are valid Perl
 tests := $(wildcard t/*.t)
 $(tests):
-	@perl -c ./$@
-	@if [ -x "./$@" ]; then ./$@; fi
+	@./tools/check-syntax.sh $@
 test: $(tests)
 .PHONY: test $(tests)

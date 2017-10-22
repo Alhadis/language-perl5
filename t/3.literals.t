@@ -1,49 +1,39 @@
 #!/usr/bin/env perl -w
-use strict; use autodie; use v5.14;
+use strict; use autodie; use v5.14; say join "\n",
 
+# Decimal
+ 12345,  4_294_967_296, 1_2_3,
+-12345, -4_294_967_296, 1_2_3,
++12345, +4_294_967_296, 1_2_3,
 
-# Integer
-say  12345             ; # Unsigned
-say -12345             ; # Signed: Negative
-say +12345             ; # Signed: Positive
+# Octal
+0337, 01337_1377,
+
+# Hexadecimal
+0xab, 0xf_ff, 0Xf_ff,
+0xAB, 0xF_FF, 0XF_FF,
+
+# Binary
+0b1100_0000, 0B1100_0000,
 
 # Floating point
-say  12345.67          ; # Unsigned
-say -12345.67          ; # Signed: Negative
-say +12345.67          ; # Signed: Positive
+ 12345.67,  .67,  12345.,  12_34_59.26_78,  .63_287,  12_45.,
+-12345.67, -.67, -12345., -12_34_59.26_78, -.63_287, -12_45.,
++12345.67, +.67, +12345., +12_34_59.26_78, +.63_287, +12_45.,
 
-# Floating point without leading digits
-say  .67               ; # Unsigned
-say -.67               ; # Signed: Negative
-say +.67               ; # Signed: Positive
-
-# Floating point without trailing digits
-say  12345.            ; # Unsigned
-say -12345.            ; # Signed: Negative
-say +12345.            ; # Signed: Positive
-
-
-# Scientific notation, float
-say  1.2e34,   1.2E34  ; # Unsigned
-say -1.2e34,  -1.2E34  ; # Signed: Negative
-say +1.2e34,  +1.2E34  ; # Signed: Positive
-
-# Scientific notation, float without leading digits
-say  .12e34,   .12E34  ; # Unsigned
-say -.12e34,  -.12E34  ; # Signed: Negative
-say +.12e34,  +.12E34  ; # Signed: Positive
-
-# Scientific notation, float without trailing digits
-say  12.e34,   12.E34  ; # Unsigned
-say -12.e34,  -12.E34  ; # Signed: Negative
-say +12.e34,  +12.E34  ; # Signed: Positive
-
-# Scientific notation, integer
-say  12e34,     12E34  ; # Unsigned
-say -12e34,    -12E34  ; # Signed: Negatve
-say +12e34,    +12E34  ; # Signed: Positive
+# Scientific notation
+ 1.2e34,    1.2E34,   .12e34,   .12E34,   12.e34,   12.E34,   12e34,   12E34,
+-1.2e34,   -1.2E34,  -.12e34,  -.12E34,  -12.e34,  -12.E34,  -12e34,  -12E34,
++1.2e34,   +1.2E34,  +.12e34,  +.12E34,  +12.e34,  +12.E34,  +12e34,  +12E34,
+ 1.2e-34,  1.2E-34,  .12e-34,  .12E-34,  12.e-34,  12.E-34,  12e-34,  12E-34,
+-1.2e-34, -1.2E-34, -.12e-34, -.12E-34, -12.e-34, -12.E-34, -12e-34, -12E-34,
++1.2e-34, +1.2E-34, +.12e-34, +.12E-34, +12.e-34, +12.E-34, +12e-34, +12E-34,
+ 1.2e+34,  1.2E+34,  .12e+34,  .12E+34,  12.e+34,  12.E+34,  12e+34,  12E+34,
+-1.2e+34, -1.2E+34, -.12e+34, -.12E+34, -12.e+34, -12.E+34, -12e+34, -12E+34,
++1.2e+34, +1.2E+34, +.12e+34, +.12E+34, +12.e+34, +12.E+34, +12e+34, +12E+34,
 
 
+"\n";
 # Invalid
 my $invalid_do_not_run = <<'PERL';
 	 e12,   E12;
@@ -54,16 +44,3 @@ my $invalid_do_not_run = <<'PERL';
 	-12e,  -12E;
 	+12e,  +12E;
 PERL
-
-
-
-
-# Integer with thousand separators
-say  4_294_967_296;      # Unsigned
-say -4_294_967_296;      # Signed: Negative
-say +4_294_967_296;      # Signed: Positive
-
-
-say 0377;            # Octal
-say 0xffff;          # Hexadecimal
-say 0b1100_0000;     # Binary
