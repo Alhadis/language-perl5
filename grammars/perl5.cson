@@ -28,6 +28,7 @@ firstLineMatch: """(?x)
 patterns: [
 	{include: "#comment"}
 	{include: "#names"}
+	{include: "#quotes"}
 	{include: "#literals"}
 ]
 
@@ -199,6 +200,10 @@ repository:
 			beginCaptures: 0: name: "constant.character.escape.translation.begin.perl"
 			endCaptures:   1: name: "constant.character.escape.translation.end.perl"
 			patterns: [include: "#escapesDoubleQuoted"]
+		},{
+			# Other escape
+			name: "constant.character.escape.unknown.perl"
+			match: "\\\\."
 		}]
 
 
@@ -289,6 +294,184 @@ repository:
 			name: "constant.numeric.integer.decimal.perl"
 			match: "[-+]?(?!_)[_0-9]+(?<!_)"
 		}]
+	
+	
+	# Quote constructs
+	quotes:
+		patterns: [
+			{include: "#quoteInterpolated"}
+			{include: "#quoteUninterpolated"}
+		]
+	
+	# Quote a string without interpolation
+	quoteUninterpolated:
+		patterns: [{
+			# q(string) qw(string)
+			name:  "string.quoted.other.$1.uninterpolated.round.brackets.perl"
+			begin: "(qw|q)\\s*(\\()"
+			end:   "\\)"
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteRoundBrackets"]
+		},{
+			# q{string} qw{string}
+			name:  "string.quoted.other.$1.uninterpolated.curly.brackets.perl"
+			begin: "(qw|q)\\s*({)"
+			end:   "}"
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteCurlyBrackets"]
+		},{
+			# q[string] qw[string]
+			name:  "string.quoted.other.$1.uninterpolated.square.brackets.perl"
+			begin: "(qw|q)\\s*(\\[)"
+			end:   "\\]"
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteSquareBrackets"]
+		},{
+			# q<string> qw<string>
+			name:  "string.quoted.other.$1.uninterpolated.angle.brackets.perl"
+			begin: "(qw|q)\\s*(<)"
+			end:   ">"
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteAngleBrackets"]
+		},{
+			# qq'string' qx'string'
+			name: "string.quoted.other.$1.uninterpolated.perl"
+			begin: "(qq|qr|qx)\\s*(')"
+			end:   "'",
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [
+				{match: "\\\\[@$]"}
+				{include: "#escapesDoubleQuoted"}
+			]
+		},{
+			# q/string/ q|string| q,string,
+			name: "string.quoted.other.$1.uninterpolated.perl"
+			begin: "(qw|q)\\s*([^[:alnum:][:space:]])"
+			end:   "\\2",
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#escapesDoubleQuoted"]
+		}]
+	
+	
+	# Quote a string with interpolation
+	quoteInterpolated:
+		patterns: [{
+			# qq(string)
+			name:  "string.quoted.other.$1.interpolated.round.brackets.perl"
+			begin: "(qq|qr|qx)\\s*(\\()"
+			end:   "\\)"
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [
+				{include: "#quoteRoundBrackets"}
+				{include: "#escapesDoubleQuoted"}
+			]
+		},{
+			# qq{string}
+			name:  "string.quoted.other.$1.interpolated.curly.brackets.perl"
+			begin: "(qq|qr|qx)\\s*({)"
+			end:   "}"
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [
+				{include: "#quoteCurlyBrackets"}
+				{include: "#escapesDoubleQuoted"}
+			]
+		},{
+			# qq[string]
+			name:  "string.quoted.other.$1.interpolated.square.brackets.perl"
+			begin: "(qq|qr|qx)\\s*(\\[)"
+			end:   "\\]"
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [
+				{include: "#quoteSquareBrackets"}
+				{include: "#escapesDoubleQuoted"}
+			]
+		},{
+			# qq<string>
+			name:  "string.quoted.other.$1.interpolated.angle.brackets.perl"
+			begin: "(qq|qr|qx)\\s*(<)"
+			end:   ">"
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [
+				{include: "#quoteAngleBrackets"}
+				{include: "#escapesDoubleQuoted"}
+			]
+		},{
+			# qq/string/ qq|string| qq,string,
+			name: "string.quoted.other.$1.interpolated.perl"
+			begin: "(qq|qr|qx)\\s*([^[:alnum:][:space:]])"
+			end:   "\\2",
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [
+				{include: "#quoteSquareBrackets"}
+				{include: "#escapesDoubleQuoted"}
+			]
+		}]
+	
+	# Patterns for matching recursive nesting
+	quoteCurlyBrackets:
+		begin: "{"
+		end:   "}"
+		patterns: [include: "#quoteCurlyBrackets"]
+	
+	quoteRoundBrackets:
+		begin: "\\("
+		end:   "\\)"
+		patterns: [include: "#quoteRoundBrackets"]
+	
+	quoteSquareBrackets:
+		begin: "\\["
+		end:   "\\]"
+		patterns: [include: "#quoteSquareBrackets"]
+	
+	quoteAngleBrackets:
+		begin: "<"
+		end:   ">"
+		patterns: [include: "#quoteAngleBrackets"]
+	
 	
 	
 	# $scalar_terms

@@ -55,4 +55,5 @@ my $invalid_do_not_run = <<'PERL';
 	"\N{u+BAD} \N{u+BA_AD}",
 	
 	"unused \E escape",
+	"<\J>",
 PERL
