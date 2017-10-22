@@ -1,5 +1,5 @@
 #!/usr/bin/env perl -w
-use strict; use autodie; use v5.14; say join "\n",
+use strict; use autodie; use v5.14; use utf8; say join "\n",
 
 # Decimal
  12345,  4_294_967_296, 1_2_3,
@@ -43,4 +43,7 @@ my $invalid_do_not_run = <<'PERL';
 	 12e,   12E;
 	-12e,  -12E;
 	+12e,  +12E;
+
+	0787,  -01997,
+	0b102, 0b2991, 0B102, 0B29_91,
 PERL

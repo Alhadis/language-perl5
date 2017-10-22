@@ -44,3 +44,15 @@ $main::main::{"qual" . $ified};
 $::main::main::qualified;
 $::main::main::{"qual" . "ified"};
 $::main::main::{"qual" . $ified};
+
+
+# Qualified names, Archaic form
+$qualified'scalar'reference;
+$'qualified;
+$'main'main'qualified;
+$#qualified'scalar'reference;
+
+$qualified::scalar'reference;
+$'qualified;
+$'main'main::qualified;
+$#qualified'scalar::reference;

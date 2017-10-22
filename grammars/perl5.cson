@@ -27,7 +27,7 @@ firstLineMatch: """(?x)
 
 patterns: [
 	{include: "#comment"}
-	{include: "#variables"}
+	{include: "#names"}
 	{include: "#literals"}
 ]
 
@@ -38,36 +38,36 @@ repository:
 		patterns: [{
 			# @days[3, 4, 5]
 			name: "meta.slice.array.perl"
-			begin: "((@)((?:\\w|::)+)|(?<=}|\\]))(\\[)"
+			begin: "((@)((?:[\\w']|::)+)|(?<=}|\\]))(\\[)"
 			end:   "]"
 			beginCaptures:
 				1: name: "variable.other.array.list.perl"
 				2: name: "punctuation.definition.variable.array.sigil.perl"
-				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				3: patterns: [include: "#namespace"]
 				4: name: "punctuation.definition.array.slice.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.array.slice.end.perl"
-			patterns: [include: "#variableInnards"]
+			patterns: [include: "#nameInnards"]
 		},{
 			# @days{"Jan","Feb"}
 			name:  "meta.slice.hash.perl"
-			begin: "((@)((?:\\w|::)+)|(?<=}|\\]))({)"
+			begin: "((@)((?:[\\w']|::)+)|(?<=}|\\]))({)"
 			end:   "}"
 			beginCaptures:
 				1: name: "variable.other.array.list.perl"
 				2: name: "punctuation.definition.variable.array.sigil.perl"
-				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				3: patterns: [include: "#namespace"]
 				4: name: "punctuation.definition.array.slice.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.array.slice.end.perl"
-			patterns: [include: "#variableInnards"]
+			patterns: [include: "#nameInnards"]
 		},{
 			# @array
 			name: "variable.other.array.list.perl"
-			match: "(@)((?:\\w|::)+)"
+			match: "(@)((?:[\\w']|::)+)"
 			captures:
 				1: name: "punctuation.definition.variable.array.sigil.perl"
-				2: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				2: patterns: [include: "#namespace"]
 		}]
 	
 	comment:
@@ -76,22 +76,175 @@ repository:
 		end:   "$"
 		beginCaptures:
 			0: name: "punctuation.definition.comment.perl"
+	
+	
+	# Patterns used inside hexadecimal character escapes like \x{AF} and \N{U+AF}
+	escapeHexInnards:
+		patterns: [{
+			match: "(_)?([A-Fa-f0-9_]+)(?<!_)(_)?",
+			captures:
+				1: name: "invalid.illegal.syntax.non-hex.perl"
+				2: name: "constant.numeric.integer.hexadecimal.perl"
+				3: name: "invalid.illegal.syntax.non-hex.perl"
+		},{
+			name: "invalid.illegal.syntax.non-hex.perl",
+			match: ".+"
+		}]
+
+
+	# Single-quoted string escapes: only two sequences are recognised
+	escapesSingleQuoted:
+		patterns: [{
+			name: "constant.character.escape.backslash.perl"
+			match: "\\\\\\\\"
+		},{
+			name: "constant.character.escape.single-quote.perl"
+			match: "\\\\'"
+		}]
+	
+	
+	# Typical escape sequence recognised in double-quoted strings
+	escapesDoubleQuoted:
+		patterns: [{
+			include: "#escapesSingleQuoted"
+		},{
+			include: "#variableInterpolation"
+		},{
+			name: "constant.character.escape.double-quote.perl"
+			match: '\\\\"'
+		},{
+			name: "constant.character.escape.newline.lf.perl"
+			match: "\\\\n"
+		},{
+			name: "constant.character.escape.newline.cr.perl"
+			match: "\\\\r"
+		},{
+			name: "constant.character.escape.tab.perl"
+			match: "\\\\t"
+		},{
+			name: "constant.character.escape.form-feed.perl"
+			match: "\\\\f"
+		},{
+			name: "constant.character.escape.backspace.perl"
+			match: "\\\\b"
+		},{
+			name: "constant.character.escape.alert.perl"
+			match: "\\\\a"
+		},{
+			name: "constant.character.escape.esc.perl"
+			match: "\\\\e"
+		},{
+			name: "constant.character.escape.codepoint.octal.perl"
+			match: "\\\\[0-7]{3}"
+		},{
+			# \o{77} - Octal codepoint
+			name: "constant.character.escape.unicode.codepoint.octal.perl"
+			match: '\\\\o({)([0-7][0-7_]*(?<!_))?([^0-7}"][^}"]*)?(})'
+			captures:
+				1: name: "punctuation.definition.escape.begin.perl"
+				2: name: "constant.numeric.integer.octal.perl"
+				3: name: "invalid.illegal.syntax.non-octal.perl"
+				4: name: "punctuation.definition.escape.end.perl"
+		},{
+			# \xFF - Hexadecimal codepoint
+			name: "constant.character.escape.unicode.codepoint.hexadecimal.perl"
+			match: "\\\\x[A-Fa-f0-9]{2}"
+		},{
+			# \x{263A} - Long hexadecimal codepoint
+			name: "constant.character.escape.unicode.codepoint.hexadecimal.perl"
+			match: '\\\\x({)([^}"]*)(}|(?=\\"))'
+			captures:
+				1: name: "punctuation.definition.escape.begin.perl"
+				2: patterns: [include: "#escapeHexInnards"]
+				3: name: "punctuation.definition.escape.end.perl"
+		},{
+			# \N{U+E9} - Named character, codepoint
+			name: "constant.character.escape.named.unicode.perl"
+			match: "\\\\N({)U\\+([_A-Fa-f0-9]+)(})"
+			captures:
+				1: name: "punctuation.definition.escape.begin.perl"
+				2: patterns: [include: "#escapeHexInnards"]
+				3: name: "punctuation.definition.escape.end.perl"
+		},{
+			# \N{LONG CHARACTER NAME} - Long chararacter name
+			name: "constant.character.escape.named.long.charname.perl"
+			match: "\\\\N({)[^\\}]*(})"
+			captures:
+				1: name: "punctuation.definition.escape.begin.perl"
+				2: name: "punctuation.definition.escape.end.perl"
+		},{
+			# \cC - Control-C
+			name: "constant.character.escape.control.codepoint.perl"
+			match: "\\\\c[ -z|}~]"
+		},{
+			# \u - Titlecase next character
+			name: "constant.character.escape.translation.titlecase.perl"
+			match: "\\\\u([^\\\\\"]|\\\\.)"
+			captures: 1: patterns: [include: "#escapesDoubleQuoted"]
+		},{
+			# \l - Lowercase next character
+			name: "constant.character.escape.translation.lowercase.perl"
+			match: "\\\\l([^\\\\\"]|\\\\.)"
+			captures: 1: patterns: [include: "#escapesDoubleQuoted"]
+		},{
+			# \E - End of translation
+			name: "invalid.illegal.useless.perl"
+			match: "\\\\E"
+		},{
+			# Range of translated characters, like \U…abc…\E
+			name: "meta.translation.perl"
+			begin: "\\\\[ULFQE]"
+			end:  '(\\\\E)|(?="|\\\\[FLUQ])'
+			contentName: "constant.character.translated.perl"
+			beginCaptures: 0: name: "constant.character.escape.translation.begin.perl"
+			endCaptures:   1: name: "constant.character.escape.translation.end.perl"
+			patterns: [include: "#escapesDoubleQuoted"]
+		}]
 
 
 	# %hash_terms
 	hash:
 		name: "variable.other.hash.perl"
-		match: "(%)((?:\\w|::)+)"
+		match: "(%)((?:[\\w']|::)+)"
 		captures:
 			1: name: "punctuation.definition.variable.hash.sigil.perl"
-			2: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+			2: patterns: [include: "#namespace"]
 
 
 	# Scalar literals
 	literals:
 		patterns: [
 			{include: "#number"}
+			{include: "#string"}
 		]
+	
+	
+	# Pointers to an entry in a package's symbol table. E.g., "variables"
+	names:
+		patterns: [
+			{include: "#array"}
+			{include: "#hash"}
+			{include: "#scalar"}
+		]
+
+
+	# Patterns used inside stuff like ${scalar} or $hash{key}
+	nameInnards:
+		patterns: [{
+			name: "variable.other.scalar.perl"
+			match: "\\w+"
+		}, include: "$self"]
+	
+	
+	# Delimiters used inside qualified name lookups $like::this::one
+	namespace:
+		patterns: [{
+			name: "punctuation.separator.namespace.quote.perl"
+			match: "'"
+		},{
+			name: "punctuation.separator.namespace.double-colon.perl"
+			match: "::"
+		}]
 	
 	
 	# Numeric literals
@@ -115,11 +268,22 @@ repository:
 		},{
 			# Binary
 			name: "constant.numeric.integer.binary.perl"
-			match: "[-+]?0[bB](?!_)[_01]*(?<!_)"
+			match: "[-+]?0[bB](?!_)([_0-9]*)(?<!_)"
+			captures:
+				1: patterns: [{
+					name: "invalid.illegal.syntax.non-binary.perl"
+					match: "[2-9]+"
+				}]
+			
 		},{
 			# Octal
 			name: "constant.numeric.integer.octal.perl"
-			match: "[-+]?0(?!_)[_0-9]+(?<!_)"
+			match: "[-+]?0(?!_)([_0-9]+)(?<!_)"
+			captures:
+				1: patterns: [{
+					name: "invalid.illegal.syntax.non-octal.perl"
+					match: "[89]+"
+				}]
 		},{
 			# Integer
 			name: "constant.numeric.integer.decimal.perl"
@@ -132,11 +296,11 @@ repository:
 		patterns: [{
 			# $#array - Last index of @array
 			name: "variable.other.scalar.length.perl"
-			match: "(\\$)(#)((?:\\w|::)+)"
+			match: "(\\$)(#)((?:[\\w']|::)+)"
 			captures:
 				1: name: "punctuation.definition.variable.scalar.sigil.perl"
 				2: name: "punctuation.definition.variable.length.perl"
-				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				3: patterns: [include: "#namespace"]
 		},{
 			# ${scalar}
 			name: "meta.scalar.reference.perl"
@@ -147,53 +311,67 @@ repository:
 				2: name: "punctuation.definition.variable.scalar.name.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.variable.scalar.name.end.perl"
-			patterns: [include: "#variableInnards"]
+			patterns: [include: "#nameInnards"]
 		},{
 			# $hash{key}
 			name:  "meta.access.hash.perl"
-			begin: "((\\$)((?:\\w|::)+)|(?<=}|\\]))({)"
+			begin: "((\\$)((?:[\\w']|::)+)|(?<=}|\\]))({)"
 			end:   "}"
 			beginCaptures:
 				1: name: "variable.other.scalar.hash-item.perl"
 				2: name: "punctuation.definition.variable.scalar.sigil.perl"
-				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				3: patterns: [include: "#namespace"]
 				4: name: "punctuation.definition.access.hash.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.access.hash.end.perl"
-			patterns: [include: "#variableInnards"]
+			patterns: [include: "#nameInnards"]
 		},{
 			# $array[index]
 			name: "meta.access.array.perl"
-			begin: "((\\$)((?:\\w|::)+)|(?<=}|\\]))(\\[)"
+			begin: "((\\$)((?:[\\w']|::)+)|(?<=}|\\]))(\\[)"
 			end:   "]"
 			beginCaptures:
 				1: name: "variable.other.scalar.array-item.perl"
 				2: name: "punctuation.definition.variable.scalar.sigil.perl"
-				3: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				3: patterns: [include: "#namespace"]
 				4: name: "punctuation.definition.array.access.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.array.access.end.perl"
-			patterns: [include: "#variableInnards"]
+			patterns: [include: "#nameInnards"]
 		},{
 			# $scalar
 			name: "variable.other.scalar.perl"
-			match: "(\\$)((?:\\w|::)+)"
+			match: "(\\$)((?:[\\w']|::)+)"
 			captures:
 				1: name: "punctuation.definition.variable.scalar.sigil.perl"
-				2: patterns: [match: "::", name: "punctuation.separator.namespace.perl"]
+				2: patterns: [include: "#namespace"]
+		}]
+
+	
+	# String literal
+	string:
+		patterns: [{
+			# 'Single-quoted string'
+			name:  "string.quoted.single.perl"
+			begin: "'"
+			end:   "'"
+			beginCaptures: 0: name: "punctuation.definition.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.string.end.perl"
+			patterns: [include: "#escapesSingleQuoted"]
+		},{
+			# "Double-quoted string"
+			name:  "string.quoted.double.perl"
+			begin: '"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.string.end.perl"
+			patterns: [include: "#escapesDoubleQuoted"]
 		}]
 
 
-	variables:
+	# Scalars and arrays interpolated inside strings; hashes don't interpolate
+	variableInterpolation:
 		patterns: [
 			{include: "#array"}
-			{include: "#hash"}
 			{include: "#scalar"}
 		]
-
-	# Patterns used inside stuff like ${scalar} or $hash{key}
-	variableInnards:
-		patterns: [{
-			name: "variable.other.scalar.perl"
-			match: "\\w+"
-		}, include: "$self"]
