@@ -2,10 +2,9 @@ my $scalar   = $days;
 my $arrayRef = $days[28];
 my $hashRef  = $days{"Feb"};
 
-
 # Scalar terms
 ${days}             ; # Same as $days but unambiguous before alphanumerics
-my ${               ; # This may span multiple lines:
+${                  ; # This may span multiple lines:
 	otherValue
 } = $ref            ; # Legal code
 $otherValue = ${
@@ -27,7 +26,11 @@ $days{2000,"Feb"}   ; # Multidimensional hash emulation
 @days{"Jan","Feb"}  ; # Hash slice containing ($days{"Jan"},$days{"Feb"})
 
 
-# Name lookups
+# Hash terms
+%days = (Jan => 31, Feb => $leap ? 29 : 28);
+
+
+# Qualified names
 $unqualified;
 $qualified::scalar::reference;
 $::qualified;
@@ -41,37 +44,3 @@ $main::main::{"qual" . $ified};
 $::main::main::qualified;
 $::main::main::{"qual" . "ified"};
 $::main::main::{"qual" . $ified};
-
-
-# Hash terms
-%days = (Jan => 31, Feb => $leap ? 29 : 28);
-
-
-# UTF8 names (camel-book.pdf: p281)
-use v5.14;          ; # includes the unicode_strings feature
-use utf8;           ; # handles UTF–8 literals
-
-# a few character sets
-my @IsO      = qw( Latin1 Latin2 Latin15 );
-my @μsoft    = qw( cp852 cp1251 cp1252 );
-my @鯉       = qw( koi8–f koi8–u koi8–r );
-
-# whether to include answers that return no results
-my $INCLUÍR_NINGUNOS = 0;
-
-# whether diacritics matter
-my $SI_IMPORTAN_MARCAS_DIACRÍTICAS = 0;
-
-# think of << as the "hasta" operator :)
-my @ciudades_españolas = ordenar_a_la_española(<<'LA_ÚLTIMA' =~ /\S.*\S/g);
-.....
-.....
-LA_ÚLTIMA
-
-my $déjà_imprimée; # le nom d'une ville
-
-# Greek hypermegas
-my @ὑπέρμεγας = ( );
-
-# Ok, now we’re just showing off :–)
-my $ʇndʇno = uʍopəpᴉƨdn($input);
