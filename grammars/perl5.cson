@@ -184,7 +184,7 @@ repository:
 		]
 	
 	
-	# Quote a string with interpolation
+	# Interpolated quoting constructs
 	quoteInterpolated:
 		patterns: [{
 			# qq(string)
@@ -240,13 +240,18 @@ repository:
 				2: name: "punctuation.definition.quote.string.begin.perl"
 			endCaptures:
 				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [{
-				name: "constant.character.escape.backslash.perl"
-				match: "\\\\\\\\"
-			},{
-				name: "constant.character.escape.single-quote.perl"
-				match: "\\\\'"
-			}]
+			patterns: [include: "#quoteInterpolatedSingleQuotes"]
+		},{
+			# qq'string'
+			name: "string.quoted.other.$1.interpolated.single-quote.perl"
+			begin: "(qq)\\s*(')"
+			end:   "'",
+			beginCaptures:
+				0: name: "keyword.operator.quote.specifier.perl"
+				2: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:
+				0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteInterpolatedClampHack"]
 		},{
 			# qq/string/ qq|string| qq,string,
 			name: "string.quoted.other.$1.interpolated.perl"
@@ -258,6 +263,29 @@ repository:
 			endCaptures:
 				0: name: "punctuation.definition.quote.string.end.perl"
 			patterns: [include: "#stringEscapes"]
+		}]
+	
+	
+	# Hack to fix qq'quotes which $end_like_this'
+	quoteInterpolatedClampHack:
+		patterns: [
+			match: "((?:[^\\\\']|\\\\.)+)(?=')"
+			captures: 1: patterns: [
+				{include: "#quoteInterpolatedSingleQuotes"}
+				{include: "#stringEscapes"}]
+			{include: "#quoteInterpolatedSingleQuotes"}
+			{include: "#stringEscapes"}
+		]
+	
+	
+	# Patterns shared by qq'string' and uninterpolated forms: qr'string' and qx'string'
+	quoteInterpolatedSingleQuotes:
+		patterns: [{
+			name: "constant.character.escape.backslash.perl"
+			match: "\\\\\\\\"
+		},{
+			name: "constant.character.escape.single-quote.perl"
+			match: "\\\\'"
 		}]
 	
 	
@@ -311,8 +339,7 @@ repository:
 		}]
 	
 	
-	
-	# Quote a string without interpolation
+	# Uninterpolated quoting constructs
 	quoteUninterpolated:
 		patterns: [{
 			# q(string) qw(string)
