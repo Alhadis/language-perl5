@@ -1,110 +1,250 @@
 #!/usr/bin/env perl -w
 use strict; use autodie; use v5.14; use utf8;
-my $interpolated   = 1;
-my $uninterpolated = 2;
-my $condition      = 3;
-my $before         = "ABC";
-my $after          = "XYZ";
-$_ = $before;
-say join "\n",
+$_ = ""; my $is = ""; my $not = "", my $interpolated = ""; say join "\n",
 
-q /String, $uninterpolated/,
-q !String!, q,STRING $uninterpolated,,
-q { if ($condition) { print "Gotcha!"; } },
-q ( print(("Gotcha!")); if ((( $condition ))) ),
-q < print<<"Gotcha!">>; if <<< $condition >>> >,
-q [ print[["Gotcha!"]]; if [[[ $condition ]]] ],
+
+# q/string/
+q/String \t ${not} \/ \\\/ \/ ${not} $interpolated/,
+q!String \t ${not} \! \\\! \! ${not} $interpolated!,
+q,String \t ${not} \, \\\, \, $interpolated,,
+q{if ($interpolated) { print $interpolated; }},
+q(print ((( \) $interpolated \( ))); if "\)" ne "\(" ()),
+q<print <<< \> $interpolated \< >>>; if "\>" ne "\<" <>>,
+q[print [[[ \] $interpolated \[ ]]]; if "\]" ne "\[" []],
+
+q / String \t ${not} \/ \\\/ \/ ${not} $interpolated /,
+q ! String \t ${not} \! \\\! \! ${not} $interpolated !,
+q , String \t ${not} \, \\\, \, $interpolated,,
+q { if ($interpolated) { print $interpolated; } },
+q ( print ((( \) $interpolated \( ))); if "\)" ne "\(" () ),
+q < print <<< \> $interpolated \< >>>; if "\>" ne "\<" <> >,
+q [ print [[[ \] $interpolated \[ ]]]; if "\]" ne "\[" [] ],
+
 q /
-	String,
-	$uninterpolated
+	String \t \r\n
+	${not} \/ \\\/ \/
+	${not} $interpolated
 /,
 q !
-	Str
-	ing
+	String \t \r\n
+	${not} \! \\\! \!
+	${not} $interpolated
 !,
 q,
-	STRING
-	$uninterpolated
+	String \t \r\n
+	${not} \, \\\, \,
+	${not} $interpolated
 ,,
 q {
-	if ($condition) {
-		print "Gotcha!";
+	if ($interpolated) {
+		print "No";
 	}
 },
 q (
-	print(("Gotcha!"));
-	if ((( $condition )))
+	print ((( $interpolated )))
+	if ("\)" ne "\(")
 ),
 q <
-	print<<"Gotcha!">>;
-	if <<< $condition >>>
+	print <<< $interpolated >>>
+	if ("\>" ne "\<") <>
 >,
 q[
-	print[["Gotcha!"]];
-	if [[[ $condition ]]]
+	print [[[ $interpolated ]]]
+	if ("\]" ne "\[") []
 ],
 
-qq /String, $interpolated/,
-qq { if ($condition) { print "Gotcha!"; } },
-qq ( print(("Gotcha!")); if ((( $condition ))) ),
-qq < print<<"Gotcha!">>; if <<< $condition >>> >,
-qq [ print[["Gotcha!"]]; if [[[ $condition ]]] ],
+
+
+# qq/interpolated string/
+qq/String \t ${is} \/ \\\/ \/ ${is} $interpolated/,
+qq!String \t ${is} \! \\\! \! ${is} $interpolated!,
+qq,String \t ${is} \, \\\, \, $interpolated,,
+qq{if ($interpolated) { print $interpolated; }},
+qq(print ((( \) $interpolated \( ))); if "\)" ne "\(" ()),
+qq<print <<< \> $interpolated \< >>>; if "\>" ne "\<" <>>,
+qq[print [[[ \] $interpolated \[ ]]]; if "\]" ne "\[" []],
+
+qq / String \t ${is} \/ \\\/ \/ ${is} $interpolated /,
+qq ! String \t ${is} \! \\\! \! ${is} $interpolated !,
+qq , String \t ${is} \, \\\, \, $interpolated,,
+qq { if ($interpolated) { print $interpolated; } },
+qq ( print ((( \) $interpolated \( ))); if "\)" ne "\(" () ),
+qq < print <<< \> $interpolated \< >>>; if "\>" ne "\<" <> >,
+qq [ print [[[ \] $interpolated \[ ]]]; if "\]" ne "\[" [] ],
+
 qq /
-	String,
-	$interpolated
+	String \t \r\n
+	${is} \/ \\\/ \/
+	${is} $interpolated
 /,
 qq !
-	Str
-	ing
+	String \t \r\n
+	${is} \! \\\! \!
+	${is} $interpolated
 !,
 qq,
-	STRING
-	$interpolated
+	String \t
+	${is} \, \\\, \,
+	${is} $interpolated
 ,,
 qq {
-	if ($condition) {
-		print "Gotcha!";
+	if ($interpolated) {
+		print "Yes";
 	}
 },
 qq (
-	print(("Gotcha!"));
-	if ((( $condition )))
+	print ((( $interpolated )))
+	if ("\)" ne "\(")
 ),
 qq <
-	print<<"Gotcha!">>;
-	if <<< $condition >>>
+	print <<< $interpolated >>>
+	if ("\>" ne "\<") <>
 >,
 qq[
-	print[["Gotcha!"]];
-	if [[[ $condition ]]]
+	print [[[ $interpolated ]]]
+	if ("\]" ne "\[") []
 ],
 
-qx /echo "Also $interpolated"/,
-qx { echo "{{{$condition}}}" },
-qx ( echo '((( $condition )))' ),
-qx < echo "<<< $condition >>>"; >,
-qx [ echo "[[[ $condition ]]]"; ],
+qq'String \t ${is} \' \\\' \' ${is} $interpolated',
+qq 'String \t ${is} \' \\\' \' ${is} $interpolated',
+qq '
+	String \t \r\n
+	${is} \' \\\' \'
+	${is} $interpolated
+',
+
+
+
+# qx/command execution/
+qx/String \t ${is} \/ \\\/ \/ ${is} $interpolated/,
+qx!String \t ${is} \! \\\! \! ${is} $interpolated!,
+qx,String \t ${is} \, \\\, \, $interpolated,,
+qx{if ($interpolated) { print $interpolated; }},
+qx(print ((( \) $interpolated \( ))); if "\)" ne "\(" ()),
+qx<print <<< \> $interpolated \< >>>; if "\>" ne "\<" <>>,
+qx[print [[[ \] $interpolated \[ ]]]; if "\]" ne "\[" []],
+
+qx / String \t ${is} \/ \\\/ \/ ${is} $interpolated /,
+qx ! String \t ${is} \! \\\! \! ${is} $interpolated !,
+qx , String \t ${is} \, \\\, \, $interpolated,,
+qx { if ($interpolated) { print $interpolated; } },
+qx ( print ((( \) $interpolated \( ))); if "\)" ne "\(" () ),
+qx < print <<< \> $interpolated \< >>>; if "\>" ne "\<" <> >,
+qx [ print [[[ \] $interpolated \[ ]]]; if "\]" ne "\[" [] ],
+
+qx /
+	String \t \r\n
+	${is} \/ \\\/ \/
+	${is} $interpolated
+/,
+qx !
+	String \t \r\n
+	${is} \! \\\! \!
+	${is} $interpolated
+!,
+qx,
+	String \t \r\n
+	${is} \, \\\, \,
+	${is} $interpolated
+,,
 qx {
-	echo "{{{$condition}}}"
+	if ($interpolated) {
+		print "Gotcha!";
+	}
 },
 qx (
-	echo '((( $condition )))'
+	print ((( \) $interpolated \( )))
+	if ("\)" ne "\(")
 ),
 qx <
-	echo "<<< $condition >>>";
+	print <<< \> $interpolated \< >>>
+	if ("\>" ne "\<") <>
 >,
-qx [
-	echo "[[[ $condition ]]]";
+qx[
+	print [[[ \] $interpolated \[ ]]]
+	if ("\]" ne "\[") []
 ],
 
+# qx'not interpolated'
+qx'String \t ${is} \' \\\' \' ${not} $interpolated',
+qx 'String \t ${is} \' \\\' \' ${not} $interpolated',
+qx '
+	String \t \r\n
+	${not} \' \\\' \'
+	${not} $interpolated
+',
 
-(),      qw/word list $uninterpolated/,
+
+
+# qw(quote words)
+qw/String \t ${not} \/ \\\/ \/ ${not} $interpolated/,
+qw!String \t ${not} \! \\\! \! ${not} $interpolated!,
+qw~String \t ${not} \~ \\\~ \~ $interpolated~,
+qw{if ($interpolated) { print $interpolated; }},
+qw(print ((( \) $interpolated \( ))); if "\)" ne "\(" ()),
+qw<print <<< \> $interpolated \< >>>; if "\>" ne "\<" <>>,
+qw[print [[[ \] $interpolated \[ ]]]; if "\]" ne "\[" []],
+
+qw / String \t ${not} \/ \\\/ \/ ${not} $interpolated /,
+qw ! String \t ${not} \! \\\! \! ${not} $interpolated !,
+qw ~String \t ${not} \~ \\\~ \~ $interpolated ~,
+qw { if ($interpolated) { print $interpolated; } },
+qw ( print ((( \) $interpolated \( ))); if "\)" ne "\(" () ),
+qw < print <<< \> $interpolated \< >>>; if "\>" ne "\<" <> >,
+qw [ print [[[ \] $interpolated \[ ]]]; if "\]" ne "\[" [] ],
+
+qw /
+	String \t \r\n
+	${not} \/ \\\/ \/
+	${not} $interpolated
+/,
+qw !
+	String \t \r\n
+	${not} \! \\\! \!
+	${not} $interpolated
+!,
+qw~
+	String \t \r\n
+	${not} \~ \\\~ \~
+	${not} $interpolated
+~,
+qw {
+	if ($interpolated) {
+		print "No";
+	}
+},
+qw (
+	print ((( \) $interpolated \( )))
+	if ("\)" ne "\(")
+),
+qw <
+	print <<< \> $interpolated \< >>>
+	if ("\>" ne "\<") <>
+>,
+qw[
+	print [[[ \] $interpolated \[ ]]]
+	if ("\]" ne "\[") []
+],
+
+# qw'not interpolated'
+qw'String \t ${is} \' \\\' \' ${not} $interpolated',
+qw 'String \t ${is} \' \\\' \' ${not} $interpolated',
+qw '
+	String \t \r\n
+	${not} \' \\\' \'
+	${not} $interpolated
+',
+
+
 //,      m/match/,
 s///,    s/find/replace/,
 tr/a/A/, y/a/A/,
 
-qq'\$before \n XYZ' =~ qr'$before',
-qq/ABC \n $after/ =~ qr/$after/,
+qq'\$before \n XYZ' =~
+qr'$uninterpolated',
+
+qq/ABC \n $interpolated/ =~
+qr/$interpolated/,
 
 
 q!I said, "You said, 'She said it.'"!,
