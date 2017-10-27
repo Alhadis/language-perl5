@@ -41,6 +41,35 @@ Yet more unsolicited barrages of whanot.
 
 =back
 
+Paragraph wrapping
+=over indentlevel
+and wrapping over
+=item * Bulleted stuff.
+and also this
+=item * Bulleted stuff.
+And all the usual bull(eted)crap.
+	wew
+	lad
+=item * Bulleted whatnot
+OKAY DONE,
+LOL.
+
+	Code example
+	perl =~ Stuff
+	More stuff
+	You get it. Right?
+
+And all the usual bull(eted)crap.
+
+	wew
+	lad
+ENDVERB
+
+End of nonsense.
+
+=back
+
+
 Paragraph
 
 =over indentlevel

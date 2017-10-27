@@ -397,3 +397,22 @@ repository:
 	params:
 		name: "variable.other.parameter.argument.pod"
 		match: "\\S+"
+
+
+	# Ordinary text block
+	paragraph:
+		name:  "markup.paragraph.pod"
+		begin: "^[^\\s=]|^\\s+(?=\\S)"
+		end:   "^(?=\\s*$)"
+		patterns: [include: "#formatting"]
+
+
+	# Indented text block, representing "verbatim" text (à la, Markdown)
+	verbatim:
+		name:  "markup.raw.code.verbatim.pod"
+		begin: "^(?=[ \\t])"
+		end:   "^(?=\\s*$)"
+		patterns: [
+			name: "punctuation.leading.whitespace.pod"
+			match: "(?:^|\\G)[ \\t]+"
+		]
