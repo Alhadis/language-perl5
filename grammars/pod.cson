@@ -324,6 +324,7 @@ repository:
 			contentName: "meta.output.format.pod"
 		}]
 
+
 	# Headings: =head[1…4]
 	heading:
 		name:  "markup.heading.$3.pod"
@@ -332,7 +333,62 @@ repository:
 		beginCaptures:
 			1: name: "storage.type.class.heading.pod"
 			2: name: "punctuation.definition.heading.pod"
-			4: patterns: [include: "#formatting"]
+			4: patterns: [include: "#inline"]
+
+
+	# Markup tags for basic inline styling: **bold**, _italic_, `monospaced`, etc…
+	inline:
+		patterns: [
+			{include: "#inlineItalic"}
+			{include: "#inlineBold"}
+			{include: "#inlineCode"}
+		]
+
+
+	# Oblique/slanted, emphasised, and/or italic text
+	inlineItalic:
+		name:  "entity.name.type.instance.pod"
+		begin: "I(<)"
+		end:   "(>)|^(?==)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.italic.pod"
+			1: name: "punctuation.definition.tag.style.italic.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.italic.pod"
+			1: name: "punctuation.definition.tag.style.italic.end.pod"
+		contentName: "markup.italic.pod"
+		patterns: [include: "#inline"]
+	
+	
+	# Bold, heavy, and/or "strong" text
+	inlineBold:
+		name:  "entity.name.type.instance.pod"
+		begin: "B(<)"
+		end:   "(>)|^(?==)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.bold.pod"
+			1: name: "punctuation.definition.tag.style.bold.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.bold.pod"
+			1: name: "punctuation.definition.tag.style.bold.end.pod"
+		contentName: "markup.bold.pod"
+		patterns: [include: "#inline"]
+	
+	
+	# `Monospaced type`, or so-called “code text”
+	inlineCode:
+		name:  "entity.name.type.instance.pod"
+		begin: "C(<)"
+		end:   "(>)|^(?==)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.raw.monospaced.pod"
+			1: name: "punctuation.definition.tag.style.raw.monospaced.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.raw.monospaced.pod"
+			1: name: "punctuation.definition.tag.style.raw.monospaced.end.pod"
+		contentName: "markup.raw.monospaced.pod"
+		patterns: [include: "#inline"]
+
 
 
 	# Hack to ignore text between a command paragraph and the next blank line
@@ -352,7 +408,7 @@ repository:
 				1: name: "storage.type.class.list.pod"
 				2: name: "punctuation.definition.list.pod"
 				3: name: "variable.ordered.list.pod"
-			patterns: [include: "#formatting"]
+			patterns: [include: "#inline"]
 		},{
 			# =item * Bulleted
 			name:  "markup.list.unnumbered.pod"
@@ -362,7 +418,7 @@ repository:
 				1: name: "storage.type.class.list.pod"
 				2: name: "punctuation.definition.list.pod"
 				3: name: "variable.unordered.list.pod"
-			patterns: [include: "#formatting"]
+			patterns: [include: "#inline"]
 		},{
 			# =item Anything else
 			name:  "markup.list.other.pod"
@@ -371,7 +427,7 @@ repository:
 			beginCaptures:
 				1: name: "storage.type.class.list.pod"
 				2: name: "punctuation.definition.list.pod"
-			patterns: [include: "#formatting"]
+			patterns: [include: "#inline"]
 		}]
 	
 	
@@ -402,9 +458,9 @@ repository:
 	# Ordinary text block
 	paragraph:
 		name:  "markup.paragraph.pod"
-		begin: "^[^\\s=]|^\\s+(?=\\S)"
+		begin: "^(?=[^\\s=])|^\\s+(?=\\S)"
 		end:   "^(?=\\s*$)"
-		patterns: [include: "#formatting"]
+		patterns: [include: "#inline"]
 
 
 	# Indented text block, representing "verbatim" text (à la, Markdown)
