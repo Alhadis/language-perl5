@@ -178,271 +178,244 @@ repository:
 	
 	# Quote constructs
 	quotes:
-		patterns: [
-			{include: "#quoteInterpolated"}
-			{include: "#quoteUninterpolated"}
-		]
-	
-	
-	# Interpolated quoting constructs
-	quoteInterpolated:
 		patterns: [{
-			# qq(string)
-			name:  "string.quoted.other.$1.interpolated.round.brackets.perl"
-			begin: "(qq|qr|qx)\\s*(\\()"
-			end:   "\\)"
+			# Interpolated: qq…
+			name:  "meta.quote.interpolated.$1.perl"
+			begin: "(qq)(?:\\s+(#.*)$\\n?|(?=\\s*(?:[^[:alnum:][:space:]#]|$)|#))"
+			end:   "(?<!\\G)(?<=[^#\\s])"
 			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [include: "#quoteInterpolatedRoundBrackets"]
+				0: name: "meta.quote.specifier.perl"
+				1: name: "keyword.operator.quote.specifier.perl"
+				2: patterns: [include: "#comment"]
+			patterns: [{
+				# …'string'
+				name: "string.quoted.other.interpolated.single-quote.perl"
+				begin: "(?:^|\\G)\\s*(')"
+				end:   "'",
+				beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+				endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+				patterns: [
+					{include: "#quoteInterpolatedSingleQuotes"}
+					{include: "#stringEscapes"}
+				]
+			}, include: "#quoteInterpolated"]
 		},{
-			# qq{string}
-			name:  "string.quoted.other.$1.interpolated.curly.brackets.perl"
-			begin: "(qq|qr|qx)\\s*({)"
-			end:   "}"
+			# Interpolated: qr, qx
+			name:  "meta.quote.interpolated.$1.perl"
+			begin: "(qr|qx)(?:\\s+(#.*)$\\n?|(?=\\s*(?:[^[:alnum:][:space:]#]|$)|#))"
+			end:   "(?<!\\G)(?<=[^#\\s])"
 			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [include: "#quoteInterpolatedCurlyBrackets"]
+				0: name: "meta.quote.specifier.perl"
+				1: name: "keyword.operator.quote.specifier.perl"
+				2: patterns: [include: "#comment"]
+			patterns: [include: "#quoteInterpolated"]
 		},{
-			# qq[string]
-			name:  "string.quoted.other.$1.interpolated.square.brackets.perl"
-			begin: "(qq|qr|qx)\\s*(\\[)"
-			end:   "\\]"
+			# Uninterpolated: qw, q
+			name:  "meta.quote.uninterpolated.$1.perl"
+			begin: "(qw|q)(?:\\s+(#.*)$\\n?|(?=\\s*(?:[^[:alnum:][:space:]#]|$)|#))"
+			end:   "(?<!\\G)(?<=[^#\\s])"
 			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [include: "#quoteInterpolatedSquareBrackets"]
-		},{
-			# qq<string>
-			name:  "string.quoted.other.$1.interpolated.angle.brackets.perl"
-			begin: "(qq|qr|qx)\\s*(<)"
-			end:   ">"
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [include: "#quoteInterpolatedAngleBrackets"]
-		},{
-			# qr'string' qx'string'
-			name: "string.quoted.other.$1.uninterpolated.perl"
-			begin: "(qr|qx)\\s*(')"
-			end:   "'",
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [include: "#quoteInterpolatedSingleQuotes"]
-		},{
-			# qq'string'
-			name: "string.quoted.other.$1.interpolated.single-quote.perl"
-			begin: "(qq)\\s*(')"
-			end:   "'",
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [include: "#quoteInterpolatedClampHack"]
-		},{
-			# qq/string/ qq|string| qq,string,
-			name: "string.quoted.other.$1.interpolated.perl"
-			begin: "(qq|qr|qx)\\s*([^[:alnum:][:space:]])"
-			end:   "\\2",
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [include: "#stringEscapes"]
+				0: name: "meta.quote.specifier.perl"
+				1: name: "keyword.operator.quote.specifier.perl"
+				2: patterns: [include: "#comment"]
+			patterns: [include: "#quoteUninterpolated"]
 		}]
 	
 	
-	# Hack to fix qq'quotes which $end_like_this'
-	quoteInterpolatedClampHack:
+	# Comment between quote specifier and opening delimiter
+	quoteComment:
+		match: "(?:(?<=\\s)|^\\s*)(#.*)$\\n?"
+		captures:
+			1: patterns: [include: "#comment"]
+	
+	
+	# Delimiters enclosing a quote construct
+	quoteInterpolated:
+		patterns: [{
+			# #string#
+			name: "string.quoted.other.interpolated.number-sign.perl"
+			begin: "\\G(?<!\\s)(#)"
+			end:   "#",
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#stringEscapes"]
+		},{
+			include: "#quoteComment"
+		},{
+			# (string)
+			name:  "string.quoted.other.interpolated.round.brackets.perl"
+			begin: "(?:^|\\G)\\s*(\\()"
+			end:   "\\)"
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteInterpolatedRoundBrackets"]
+		},{
+			# {string}
+			name:  "string.quoted.other.interpolated.curly.brackets.perl"
+			begin: "(?:^|\\G)\\s*({)"
+			end:   "}"
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteInterpolatedCurlyBrackets"]
+		},{
+			# qq[string]
+			name:  "string.quoted.other.interpolated.square.brackets.perl"
+			begin: "(?:^|\\G)\\s*(\\[)"
+			end:   "\\]"
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteInterpolatedSquareBrackets"]
+		},{
+			# <string>
+			name:  "string.quoted.other.interpolated.angle.brackets.perl"
+			begin: "(?:^|\\G)\\s*(<)"
+			end:   ">"
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteInterpolatedAngleBrackets"]
+		},{
+			# 'string'
+			name: "string.quoted.other.uninterpolated.perl"
+			begin: "(?:^|\\G)\\s*(')"
+			end:   "'",
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#quoteInterpolatedSingleQuotes"]
+		},{
+			# /string/  |string|  ,string,
+			name: "string.quoted.other.interpolated.perl"
+			begin: "(?:^|\\G)\\s*([^[:alnum:][:space:]])"
+			end:   "\\1",
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [include: "#stringEscapes"]
+		}]
+	
+	# Patterns shared by qq'string' and uninterpolated forms: qr'string' and qx'string'
+	quoteInterpolatedSingleQuotes:
 		patterns: [
-			match: "((?:[^\\\\']|\\\\.)+)(?=')"
-			captures: 1: patterns: [
-				{include: "#quoteInterpolatedSingleQuotes"}
-				{include: "#stringEscapes"}]
+			{match: "\\\\\\\\", name: "constant.character.escape.backslash.perl"}
+			{match: "\\\\'",    name: "constant.character.escape.single-quote.perl"}
+			{include: "#quoteInterpolatedSingleQuoteHack"}
 			{include: "#quoteInterpolatedSingleQuotes"}
 			{include: "#stringEscapes"}
 		]
 	
-	
-	# Patterns shared by qq'string' and uninterpolated forms: qr'string' and qx'string'
-	quoteInterpolatedSingleQuotes:
-		patterns: [{
-			name: "constant.character.escape.backslash.perl"
-			match: "\\\\\\\\"
-		},{
-			name: "constant.character.escape.single-quote.perl"
-			match: "\\\\'"
-		}]
-	
+	# Hack to fix quotes like this: qq'$name'
+	quoteInterpolatedSingleQuoteHack:
+		match: "((?:[^\\\\']|\\\\.)+)(?=')"
+		captures: 1: patterns: [
+			{include: "#quoteInterpolatedSingleQuotes"}
+			{include: "#stringEscapes"}]
 	
 	# Interpolated recursive nesting
 	quoteInterpolatedCurlyBrackets:
-		patterns: [{
-			begin: "{"
-			end:   "}"
-			patterns: [include: "#quoteInterpolatedCurlyBrackets"]
-		},{
-			name: "constant.character.escape.bracket.curly.perl"
-			match: "\\\\[{}]"
-		},{
-			include: "#stringEscapes"
-		}]
-	
+		patterns: [
+			{begin: "{", end: "}",     patterns: [include: "#quoteInterpolatedCurlyBrackets"]}
+			{match: "\\\\[{}]",        name: "constant.character.escape.bracket.curly.perl"}
+			{include: "#stringEscapes"}
+		]
 	quoteInterpolatedRoundBrackets:
-		patterns: [{
-			begin: "\\("
-			end:   "\\)"
-			patterns: [include: "#quoteInterpolatedRoundBrackets"]
-		},{
-			name: "constant.character.escape.bracket.round.perl"
-			match: "\\\\[()]"
-		},{
-			include: "#stringEscapes"
-		}]
-	
+		patterns: [
+			{begin: "\\(", end: "\\)", patterns: [include: "#quoteInterpolatedRoundBrackets"]}
+			{match: "\\\\[()]",        name: "constant.character.escape.bracket.round.perl"}
+			{include: "#stringEscapes"}
+		]
 	quoteInterpolatedSquareBrackets:
-		patterns: [{
-			begin: "\\["
-			end:   "\\]"
-			patterns: [include: "#quoteInterpolatedSquareBrackets"]
-		},{
-			name: "constant.character.escape.bracket.square.perl"
-			match: "\\\\[\\[\\]]"
-		},{
-			include: "#stringEscapes"
-		}]
-	
+		patterns: [
+			{begin: "\\[", end: "\\]", patterns: [include: "#quoteInterpolatedSquareBrackets"]}
+			{match: "\\\\[\\[\\]]",    name: "constant.character.escape.bracket.square.perl"}
+			{include: "#stringEscapes"}
+		]
 	quoteInterpolatedAngleBrackets:
-		patterns: [{
-			begin: "<"
-			end:   ">"
-			patterns: [include: "#quoteInterpolatedAngleBrackets"]
-		},{
-			name: "constant.character.escape.bracket.angle.perl"
-			match: "\\\\[<>]"
-		},{
-			include: "#stringEscapes"
-		}]
+		patterns: [
+			{begin: "<", end: ">",     patterns: [include: "#quoteInterpolatedAngleBrackets"]}
+			{match: "\\\\[<>]",        name: "constant.character.escape.bracket.angle.perl"}
+			{include: "#stringEscapes"}
+		]
 	
 	
 	# Uninterpolated quoting constructs
 	quoteUninterpolated:
 		patterns: [{
-			# q(string) qw(string)
-			name:  "string.quoted.other.$1.uninterpolated.round.brackets.perl"
-			begin: "(qw|q)\\s*(\\()"
+			# #string#
+			name: "string.quoted.other.uninterpolated.number-sign.perl"
+			begin: "\\G(?<!\\s)(#)"
+			end:   "#",
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [
+				{match: "\\\\\\\\", name: "constant.character.escape.backslash.perl"}
+				{match: "\\\\#",    name: "constant.character.escape.number-sign.perl"}
+			]
+		},{
+			include: "#quoteComment"
+		},{
+			# (string)
+			name:  "string.quoted.other.uninterpolated.round.brackets.perl"
+			begin: "(?:^|\\G)\\s*(\\()"
 			end:   "\\)"
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
 			patterns: [include: "#quoteUninterpolatedRoundBrackets"]
 		},{
-			# q{string} qw{string}
-			name:  "string.quoted.other.$1.uninterpolated.curly.brackets.perl"
-			begin: "(qw|q)\\s*({)"
+			# {string}
+			name:  "string.quoted.other.uninterpolated.curly.brackets.perl"
+			begin: "(?:^|\\G)\\s*({)"
 			end:   "}"
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
 			patterns: [include: "#quoteUninterpolatedCurlyBrackets"]
 		},{
-			# q[string] qw[string]
-			name:  "string.quoted.other.$1.uninterpolated.square.brackets.perl"
-			begin: "(qw|q)\\s*(\\[)"
+			# qq[string]
+			name:  "string.quoted.other.uninterpolated.square.brackets.perl"
+			begin: "(?:^|\\G)\\s*(\\[)"
 			end:   "\\]"
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
 			patterns: [include: "#quoteUninterpolatedSquareBrackets"]
 		},{
-			# q<string> qw<string>
-			name:  "string.quoted.other.$1.uninterpolated.angle.brackets.perl"
-			begin: "(qw|q)\\s*(<)"
+			# <string>
+			name:  "string.quoted.other.uninterpolated.angle.brackets.perl"
+			begin: "(?:^|\\G)\\s*(<)"
 			end:   ">"
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
 			patterns: [include: "#quoteUninterpolatedAngleBrackets"]
 		},{
-			# q/string/ q|string| q,string,
-			name: "string.quoted.other.$1.uninterpolated.perl"
-			begin: "(qw|q)\\s*([^[:alnum:][:space:]])"
-			end:   "\\2",
-			beginCaptures:
-				0: name: "keyword.operator.quote.specifier.perl"
-				2: name: "punctuation.definition.quote.string.begin.perl"
-			endCaptures:
-				0: name: "punctuation.definition.quote.string.end.perl"
-			patterns: [{
-				name: "constant.character.escape.backslash.perl"
-				match: "\\\\\\\\"
-			},{
-				match: "\\\\."
-			}]
+			# /string/  |string|  ,string,
+			name: "string.quoted.other.uninterpolated.perl"
+			begin: "(?:^|\\G)\\s*([^[:alnum:][:space:]])"
+			end:   "\\1",
+			beginCaptures: 1: name: "punctuation.definition.quote.string.begin.perl"
+			endCaptures:   0: name: "punctuation.definition.quote.string.end.perl"
+			patterns: [
+				{match: "\\\\\\\\", name: "constant.character.escape.backslash.perl"}
+				{match: "\\\\."}
+			]
 		}]
 	
 	# Uninterpolated recursive nesting
 	quoteUninterpolatedCurlyBrackets:
-		patterns: [{
-			begin: "{"
-			end:   "}"
-			patterns: [include: "#quoteUninterpolatedCurlyBrackets"]
-		},{
-			name: "constant.character.escape.bracket.curly.perl"
-			match: "\\\\[{}]"
-		}]
-	
+		patterns: [
+			{begin: "{", end: "}",     patterns: [include: "#quoteUninterpolatedCurlyBrackets"]}
+			{match: "\\\\[{}]",        name: "constant.character.escape.bracket.curly.perl"}
+		]
 	quoteUninterpolatedRoundBrackets:
-		patterns: [{
-			begin: "\\("
-			end:   "\\)"
-			patterns: [include: "#quoteUninterpolatedRoundBrackets"]
-		},{
-			name: "constant.character.escape.bracket.round.perl"
-			match: "\\\\[()]"
-		}]
-	
+		patterns: [
+			{begin: "\\(", end: "\\)", patterns: [include: "#quoteUninterpolatedRoundBrackets"]}
+			{match: "\\\\[()]",        name: "constant.character.escape.bracket.round.perl"}
+		]
 	quoteUninterpolatedSquareBrackets:
-		patterns: [{
-			begin: "\\["
-			end:   "\\]"
-			patterns: [include: "#quoteUninterpolatedSquareBrackets"]
-		},{
-			name: "constant.character.escape.bracket.square.perl"
-			match: "\\\\[\\[\\]]"
-		}]
-	
+		patterns: [
+			{begin: "\\[", end: "\\]", patterns: [include: "#quoteUninterpolatedSquareBrackets"]}
+			{match: "\\\\[\\[\\]]",    name: "constant.character.escape.bracket.square.perl"}
+		]
 	quoteUninterpolatedAngleBrackets:
-		patterns: [{
-			begin: "<"
-			end:   ">"
-			patterns: [include: "#quoteUninterpolatedAngleBrackets"]
-		},{
-			name: "constant.character.escape.bracket.angle.perl"
-			match: "\\\\[<>]"
-		}]
+		patterns: [
+			{begin: "<", end: ">",     patterns: [include: "#quoteUninterpolatedAngleBrackets"]}
+			{match: "\\\\[<>]",        name: "constant.character.escape.bracket.angle.perl"}
+		]
 	
 	
 	
