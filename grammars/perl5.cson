@@ -3,6 +3,7 @@ scopeName: "source.perl.5"
 fileTypes: [
 	"pl"
 	"pm"
+	"pod"
 	"psgi"
 	"t"
 ]

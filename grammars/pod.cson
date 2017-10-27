@@ -1,8 +1,5 @@
 name: "Pod"
 scopeName: "text.pod"
-fileTypes: [
-	"pod"
-]
 patterns: [
 	{include: "#commands"}
 	{include: "#verbatim"}
