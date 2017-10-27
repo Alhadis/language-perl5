@@ -55,3 +55,75 @@ C<gmtime($^T)>
 C<drwxr-xr-x>
 
 =cut
+
+
+
+# Links
+=pod
+
+1. Perldoc (Perl manual-pages)
+
+L<name>
+
+L<Net::Ping>
+
+
+2. Unix manpages
+L<grep(1)>
+
+L<grep(7abc)>
+
+L<crontab(5)>
+
+
+3. Unix manpages with label
+L<grok|grep(1)>
+
+L<grok|grep(7abc)>
+
+L<tabcron|crontab(5)>
+
+
+4. Perldoc with section reference
+
+L<name/section>
+
+L<name/"section">
+
+L<perlsyn/"For Loops">
+
+L<perlvar/$.>
+
+L<perlvar/"$.">
+
+L<perlsyn/For Loops>
+
+L<perlsyn/"For Loops">
+
+
+5. Internal section reference (reference within same document)
+
+L</"section name">
+
+L</section-name>
+
+L</"Object Methods">
+
+
+6. Perldoc with alternative text
+
+L<text|name>
+
+L<Perl Error Messages|perldiag>
+
+L<text|name/"quoted section">
+
+L<text|name/unquoted-section>
+
+L<text|/"section">
+
+L<text|/section>
+
+L<text|"section">
+
+=cut

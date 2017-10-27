@@ -342,6 +342,7 @@ repository:
 			{include: "#inlineItalic"}
 			{include: "#inlineBold"}
 			{include: "#inlineCode"}
+			{include: "#inlineLink"}
 		]
 
 
@@ -352,10 +353,10 @@ repository:
 		end:   "(>)|^(?==)"
 		beginCaptures:
 			0: name: "entity.name.inline.tag.begin.italic.pod"
-			1: name: "punctuation.definition.tag.style.italic.begin.pod"
+			1: name: "punctuation.definition.style.italic.begin.pod"
 		endCaptures:
 			0: name: "entity.name.inline.tag.end.italic.pod"
-			1: name: "punctuation.definition.tag.style.italic.end.pod"
+			1: name: "punctuation.definition.style.italic.end.pod"
 		contentName: "markup.italic.pod"
 		patterns: [include: "#inline"]
 	
@@ -367,10 +368,10 @@ repository:
 		end:   "(>)|^(?==)"
 		beginCaptures:
 			0: name: "entity.name.inline.tag.begin.bold.pod"
-			1: name: "punctuation.definition.tag.style.bold.begin.pod"
+			1: name: "punctuation.definition.style.bold.begin.pod"
 		endCaptures:
 			0: name: "entity.name.inline.tag.end.bold.pod"
-			1: name: "punctuation.definition.tag.style.bold.end.pod"
+			1: name: "punctuation.definition.style.bold.end.pod"
 		contentName: "markup.bold.pod"
 		patterns: [include: "#inline"]
 	
@@ -382,14 +383,109 @@ repository:
 		end:   "(>)|^(?==)"
 		beginCaptures:
 			0: name: "entity.name.inline.tag.begin.raw.monospaced.pod"
-			1: name: "punctuation.definition.tag.style.raw.monospaced.begin.pod"
+			1: name: "punctuation.definition.style.raw.monospaced.begin.pod"
 		endCaptures:
 			0: name: "entity.name.inline.tag.end.raw.monospaced.pod"
-			1: name: "punctuation.definition.tag.style.raw.monospaced.end.pod"
+			1: name: "punctuation.definition.style.raw.monospaced.end.pod"
 		contentName: "markup.raw.monospaced.pod"
 		patterns: [include: "#inline"]
 
-
+	
+	# Hyperlink or page reference.
+	#
+	# NOTE: To satisfy both Atom themes _and_ GitHub's fickle highlighting palette, we
+	# add an excess of scope-names. This way we grant maximum styling control to users
+	# and theme authors, yet maintain pleasing colouration when displayed on GitHub.
+	inlineLink:
+		name:  "entity.name.type.instance.link.pod"
+		begin: "(L(<))(\\s*)"
+		end:   "(\\s*)(>)|^(?==)"
+		beginCaptures:
+			1: name: "entity.name.inline.tag.begin.link.pod"
+			2: name: "punctuation.definition.link.begin.pod"
+			3: name: "invalid.illegal.syntax.leading.whitespace.pod"
+		endCaptures:
+			1: name: "invalid.illegal.syntax.trailing.whitespace.pod"
+			2: name: "punctuation.definition.link.end.pod"
+		patterns: [{
+			# L< …Displayed text… |
+			name: "meta.manpage.unix.link.label.pod"
+			match: "\\G((?:[^\\s|>][^|>]+)?)(\\|)"
+			captures:
+				1: name: "constant.other.description.pod"
+				2: name: "punctuation.separator.key-value.pipe.pod"
+		},{
+			# L<grep(1)> - Unix manpage link
+			include: "#manpageRef"
+		},{
+			# L<name/section> - Perl manpage link and/or possible section reference
+			name:  "entity.type.manpage.perldoc.link.pod"
+			begin: "\\G(\\/)|\\G([\\w:|]+)(\\/)?"
+			end:   "(?=\\s*>)"
+			beginCaptures:
+				1: name: "punctuation.separator.slash.section.link.pod"
+				2: name: "variable.markup.underline.link.pod"
+				3: name: "punctuation.separator.slash.section.link.pod"
+			patterns: [{
+				# …/section-reference…
+				name:  "meta.manpage.section.cross-reference.link.pod"
+				begin: "\\G/"
+				end:   "(?=\\s*>)"
+				beginCaptures:
+					0: name: "punctuation.separator.slash.section.link.pod"
+				patterns: [{
+					# /…"Quoted section name"…
+					name:  "variable.markup.underline.link.pod"
+					begin: '\\G"'
+					end:   '"'
+					contentName: "string.quoted.double.section.name.link.pod"
+					beginCaptures: 0: name: "punctuation.definition.string.begin.pod"
+					endCaptures:   0: name: "punctuation.definition.string.end.pod"
+				},{
+					# /…Unquoted section…
+					name:  "variable.markup.underline.link.pod"
+					begin: '\\G\\s*([^>"\\s]+)'
+					end:   "(?=\\s*>)"
+					beginCaptures: 0: name: "string.unquoted.other.section.name.link.pod"
+					contentName:            "string.unquoted.other.section.name.link.pod"
+				}]
+			}]
+		},{
+			# Fallback: underline anything we haven't already matched
+			match: "[^\\s|<>]+"
+			name: "variable.markup.underline.link.pod"
+		}]
+	
+	
+	# grep(1) - Unix manual-page reference
+	manpageRef:
+		name: "entity.type.manpage.unix.link.pod"
+		match: """(?x) \\G
+			# 1: Label
+			(
+				([^\\s|][^|>]+)       # 2: Possible text-label
+				(\\|)                 # 3: Separator
+			)?
+			# 4: Destination
+			(
+				([^()<>\\s]+)         # 5: Topic
+				(\\()                 # 6: (
+				([0-9])               # 7: Section number
+				((?![0-9])\\w{0,3})?  # 8: Section group/suffix
+				(\\))                 # 9: )
+			)
+		"""
+		captures:
+			1: name: "meta.manpage.unix.link.label.pod"
+			2: name: "constant.other.description.pod"
+			3: name: "punctuation.separator.key-value.pipe.pod"
+			4: name: "meta.manpage.unix.link.destination.pod"
+			5: name: "entity.name.topic.link.pod"
+			6: name: "punctuation.definition.manpage.section.begin.link.pod"
+			7: name: "constant.numeric.integer.section.link.pod"
+			8: name: "constant.language.section.suffix.link.pod"
+			9: name: "punctuation.definition.manpage.section.end.link.pod"
+		
 
 	# Hack to ignore text between a command paragraph and the next blank line
 	ignoreUntilEmptyLine:
