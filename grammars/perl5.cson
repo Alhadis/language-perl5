@@ -3,7 +3,6 @@ scopeName: "source.perl.5"
 fileTypes: [
 	"pl"
 	"pm"
-	"pod"
 	"psgi"
 	"t"
 ]
@@ -27,6 +26,7 @@ firstLineMatch: """(?x)
 
 patterns: [
 	{include: "#comment"}
+	{include: "#pod"}
 	{include: "#names"}
 	{include: "#quotes"}
 	{include: "#literals"}
@@ -175,6 +175,16 @@ repository:
 			match: "[-+]?(?!_)[_0-9]+(?<!_)"
 		}]
 	
+	
+	# Embedded Pod source
+	pod:
+		name: "comment.block.documentation.pod"
+		begin: "^(?==)"
+		end:   "^(=cut)(?:\\s+\\S.*)?\\s*$"
+		patterns: [include: "text.pod"]
+		endCaptures:
+			1: patterns: [include: "text.pod"]
+		
 	
 	# Quote constructs
 	quotes:

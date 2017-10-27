@@ -1,0 +1,326 @@
+name: "Pod"
+scopeName: "text.pod"
+fileTypes: [
+	"pod"
+]
+patterns: [
+	{include: "#commands"}
+	{include: "#verbatim"}
+	{include: "#paragraph"}
+]
+
+repository:
+
+	# Command paragraphs: =[…name]
+	commands:
+		patterns: [
+			{include: "#heading"}
+			{include: "#encoding"}
+			{include: "#overhang"}
+			{include: "#list"}
+			{include: "#formatBlocks"}
+			{include: "#formatLines"}
+			
+			# Some other command not listed in perlpod(1)
+			match: "^((=)\\S*)"
+			captures:
+				1: name: "storage.type.class.command.pod"
+				2: name: "punctuation.definition.command.pod"
+		]
+
+
+	# End Pod: =cut
+	cut:
+		match: "^((=)cut)(?:\\s+\\S.*)?\\s*$"
+		captures:
+			1: name: "storage.type.class.cut.pod"
+			2: name: "punctuation.section.end.pod"
+
+
+	# Document encoding: =encoding [name]
+	encoding:
+		match: "^((=)encoding)(?:\\s+(\\S.*)?)\\s*$"
+		captures:
+			1: name: "storage.type.class.encoding.pod"
+			2: name: "punctuation.definition.command.pod"
+			3: name: "entity.name.type.instance.encoding-type.pod"
+
+
+	# Embedded region of text/code/data
+	#    =begin [format-name]
+	#    =end   [format-name]
+	formatBlocks:
+		patterns: [{
+			# =begin html
+			# <h1 class="etc">HTML source</h1>
+			# =end html
+			name:  "meta.embedded-html.format.block.pod"
+			begin: "^((=)begin)\\s+(html)"
+			end:   "^((=)end)\\s+(html)"
+			beginCaptures:
+				1: name: "storage.type.class.format.begin.pod"
+				2: name: "punctuation.section.format.begin.pod"
+				3: name: "entity.name.type.instance.pod"
+			endCaptures:
+				1: name: "storage.type.class.format.end.pod"
+				2: name: "punctuation.section.format.end.pod"
+				3: name: "entity.name.type.instance.pod"
+			contentName: "text.embedded.html.basic"
+			patterns: [{
+				# Clamped to prevent runaway matching
+				match: "(?<=^|\\n)(?!=end\\s+html)(.+)$"
+				captures: 1:
+					patterns: [include: "text.html.basic"]
+			}]
+		},{
+			# =begin [roff|man]
+			# .TH MANPAGE 1
+			# . de XS \\n(.X \" etc
+			# . UR https://github.com/Alhadis/language-roff
+			# =end [roff|man]
+			name:  "meta.embedded-roff.format.block.pod"
+			begin: "^((=)begin)\\s+(roff|man)"
+			end:   "^((=)end)\\s+(\\3)"
+			beginCaptures:
+				1: name: "storage.type.class.format.begin.pod"
+				2: name: "punctuation.section.format.begin.pod"
+				3: name: "entity.name.type.instance.pod"
+			endCaptures:
+				1: name: "storage.type.class.format.end.pod"
+				2: name: "punctuation.section.format.end.pod"
+				3: name: "entity.name.type.instance.pod"
+			contentName: "text.embedded.roff"
+			patterns: [{
+				match: "(?<=^|\\n)(?!=end\\s+(?:roff|man))(.+)$"
+				captures: 1:
+					patterns: [include: "text.roff"]
+			}]
+		},{
+			# =begin [latex]
+			# \{latex} LaTeX
+			# =end [latex]
+			name:  "meta.embedded-latex.format.block.pod"
+			begin: "^((=)begin)\\s+(latex)"
+			end:   "^((=)end)\\s+(latex)"
+			beginCaptures:
+				1: name: "storage.type.class.format.begin.pod"
+				2: name: "punctuation.section.format.begin.pod"
+				3: name: "entity.name.type.instance.pod"
+			endCaptures:
+				1: name: "storage.type.class.format.end.pod"
+				2: name: "punctuation.section.format.end.pod"
+				3: name: "entity.name.type.instance.pod"
+			contentName: "text.embedded.latex"
+			patterns: [{
+				match: "(?<=^|\\n)(?!=end\\s+(?:latex))(.+)$"
+				captures: 1:
+					patterns: [include: "text.tex.latex"]
+			}]
+		},{
+			# =begin [tex]
+			# \mathcode`\+="202B  Plain old TeX?
+			# =end [tex]
+			name:  "meta.embedded-tex.format.block.pod"
+			begin: "^((=)begin)\\s+(tex)\\b"
+			end:   "^((=)end)\\s+(tex)\\b"
+			beginCaptures:
+				1: name: "storage.type.class.format.begin.pod"
+				2: name: "punctuation.section.format.begin.pod"
+				3: name: "entity.name.type.instance.pod"
+			endCaptures:
+				1: name: "storage.type.class.format.end.pod"
+				2: name: "punctuation.section.format.end.pod"
+				3: name: "entity.name.type.instance.pod"
+			contentName: "text.embedded.tex"
+			patterns: [{
+				match: "(?<=^|\\n)(?!=end\\s+(?:tex\\b))(.+)$"
+				captures: 1:
+					patterns: [include: "text.tex"]
+			}]
+		},{
+			# =begin [text]
+			# Plain old text
+			# =end [text]
+			name:  "meta.embedded-text.format.block.pod"
+			begin: "^((=)begin)\\s+(text)\\b"
+			end:   "^((=)end)\\s+(text)\\b"
+			beginCaptures:
+				1: name: "storage.type.class.format.begin.pod"
+				2: name: "punctuation.section.format.begin.pod"
+				3: name: "entity.name.type.instance.pod"
+			endCaptures:
+				1: name: "storage.type.class.format.end.pod"
+				2: name: "punctuation.section.format.end.pod"
+				3: name: "entity.name.type.instance.pod"
+			contentName: "text.embedded.plain"
+		},{
+			# =begin :actualpod
+			# Plain old Pod (Plain old plain old documentation)
+			# =end :actualpod
+			name:  "meta.embedded-pod.format.block.pod"
+			match: "^((=)(begin|end))\\s+((:)\\S+)"
+			captures:
+				1: name: "storage.type.class.format.$3.pod"
+				2: name: "punctuation.section.format.$3.pod"
+				4: name: "entity.name.type.instance.pod"
+				5: name: "punctuation.separator.colon.format.pod"
+		},{
+			# =begin [unknown-format]
+			# =end [unknown-format]
+			name:  "meta.embedded-$3.format.block.other.pod"
+			begin: "^((=)begin)\\s+((?!:)\\S+)"
+			end:   "^((=)end)\\s+(\\3)"
+			beginCaptures:
+				1: name: "storage.type.class.format.begin.pod"
+				2: name: "punctuation.section.format.begin.pod"
+				3: name: "entity.name.type.instance.pod"
+			endCaptures:
+				1: name: "storage.type.class.format.end.pod"
+				2: name: "punctuation.section.format.end.pod"
+				3: name: "entity.name.type.instance.pod"
+			contentName: "text.embedded.$1"
+		}]
+
+
+	# Line of embedded text/code/data
+	#    =for [format-name] [text]
+	formatLines:
+		patterns: [{
+			# =for html <h1 class="etc">HTML source</h1>
+			name:  "meta.embedded-html.format.line.pod"
+			match: "^((=)for)\\s+(html)(?:\\s+(\\S.*))?\\s*$"
+			captures:
+				1: name: "storage.type.class.format.pod"
+				2: name: "punctuation.section.format.pod"
+				3: name: "entity.name.type.instance.pod"
+				4: name: "text.embedded.html.basic", patterns: [include: "text.html.basic"]
+		},{
+			# =for roff .TH ATOM-ROFF 1
+			# =for man  .ds URL \\n(.X\fI\ https://github.com/Alhadis/language-roff
+			name:  "meta.embedded-roff.format.line.pod"
+			match: "^((=)for)\\s+(roff|man)(?:\\s+(\\S.*))?\\s*$"
+			captures:
+				1: name: "storage.type.class.format.pod"
+				2: name: "punctuation.section.format.pod"
+				3: name: "entity.name.type.instance.pod"
+				4: name: "text.embedded.roff", patterns: [include: "text.roff"]
+		},{
+			# =for latex \{LaTeX}
+			name:  "meta.embedded-latex.format.line.pod"
+			match: "^((=)for)\\s+(latex)(?:\\s+(\\S.*))?\\s*$"
+			captures:
+				1: name: "storage.type.class.format.pod"
+				2: name: "punctuation.section.format.pod"
+				3: name: "entity.name.type.instance.pod"
+				4: name: "text.embedded.latex", patterns: [include: "text.tex.latex"]
+		},{
+			# =for tex \{TeX}
+			name:  "meta.embedded-tex.format.line.pod"
+			match: "^((=)for)\\s+(tex)(?:\\s+(\\S.*))?\\s*$"
+			captures:
+				1: name: "storage.type.class.format.pod"
+				2: name: "punctuation.section.format.pod"
+				3: name: "entity.name.type.instance.pod"
+				4: name: "text.embedded.tex", patterns: [include: "text.tex"]
+		},{
+			# =for text Plain-text
+			name: "meta.embedded-text.format.line.pod"
+			match: "^((=)for)\\s+(text)(?:\\s+(\\S.*))?\\s*$"
+			captures:
+				1: name: "storage.type.class.format.pod"
+				2: name: "punctuation.section.format.pod"
+				3: name: "entity.name.type.instance.pod"
+				4: name: "text.embedded.plain"
+		},{
+			# =for comment {Ignored in formatted documentation}
+			name: "meta.ignored.format.line.pod"
+			match: "^((=)for)\\s+(comment)(?:\\s+(\\S.*))?\\s*$"
+			captures:
+				1: name: "storage.type.class.format.pod"
+				2: name: "punctuation.section.format.pod"
+				3: name: "entity.name.type.instance.pod"
+				4: name: "constant.other.ignored-text.pod"
+		},{
+			# =for :[…anything] Actual Pod code
+			name:  "meta.embedded-pod.format.line.pod"
+			match: "^((=)(for))\\s+((:)\\S+)(?:\\s+(\\S.*))?\\s*$"
+			captures:
+				1: name: "storage.type.class.format.pod"
+				2: name: "punctuation.section.format.pod"
+				4: name: "entity.name.type.instance.pod"
+				5: name: "punctuation.separator.colon.format.pod"
+				6: patterns: [include: "#params"]
+		},{
+			# =for [unknown-format] Anything else
+			name:  "meta.embedded-$3.format.line.other.pod"
+			match: "^((=)for)\\s+((?!:)\\S+)(?:\\s+(\\S.*))?\\s*$"
+			captures:
+				1: name: "storage.type.class.format.begin.pod"
+				2: name: "punctuation.section.format.begin.pod"
+				3: name: "entity.name.type.instance.pod"
+				4: name: "text.embedded.$3"
+		}]
+
+	# Headings: =head[1…4]
+	heading:
+		name:  "markup.heading.$3.pod"
+		match: "^((=)head([1-4]))(?:\\s+(\\S.*))?\\s*$"
+		captures:
+			1: name: "storage.type.class.heading.pod"
+			2: name: "punctuation.definition.heading.pod"
+			4: patterns: [include: "#formatting"]
+
+
+	# List item: =item
+	list:
+		patterns: [{
+			# =item 1. Numbered
+			name: "markup.list.numbered.pod"
+			match: "^((=)item)(?>\\s+(\\d+\\.)\\s*)(.*?)$"
+			captures:
+				1: name: "storage.type.class.list.pod"
+				2: name: "punctuation.definition.list.pod"
+				3: name: "variable.ordered.list.pod"
+				4: patterns: [include: "#formatting"]
+		},{
+			# =item * Bulleted
+			name: "markup.list.unnumbered.pod"
+			match: "^((=)item)(?:\\s+(\\*)\\s*)(.*)?$"
+			captures:
+				1: name: "storage.type.class.list.pod"
+				2: name: "punctuation.definition.list.pod"
+				3: name: "variable.unordered.list.pod"
+				4: patterns: [include: "#formatting"]
+		},{
+			# =item Anything else
+			name: "markup.list.other.pod"
+			match: "^((=)item)(\\s+\\S.*)?$"
+			captures:
+				1: name: "storage.type.class.list.pod"
+				2: name: "punctuation.definition.list.pod"
+				3: patterns: [include: "#formatting"]
+		}]
+	
+	
+	# Overhanging list or indented paragraph
+	#    =over [indent-level]  - Begin list
+	#    =item [item-text]     - List item
+	#    =back                 - End list
+	overhang:
+		name:  "meta.overhang.pod"
+		begin: "^((=)over)(?:\\s+(\\S.*))?\\s*$"
+		end:   "^((=)back)(?:\\b.*$)|^(?==cut(?:\\s|$))"
+		beginCaptures:
+			1: name: "storage.type.class.list.begin.pod"
+			2: name: "punctuation.section.list.begin.pod"
+			3: name: "constant.language.numeric.indent-level.pod"
+		endCaptures:
+			1: name: "storage.type.class.list.end.pod"
+			2: name: "punctuation.section.list.end.pod"
+		patterns: [include: "text.pod"]
+
+
+	# Fallback highlighting for arguments to unrecognised commands
+	params:
+		name: "variable.other.parameter.argument.pod"
+		match: "\\S+"
