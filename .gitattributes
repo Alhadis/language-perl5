@@ -1,0 +1,6 @@
+# Unvendor build-scripts
+tools/*  linguist-vendored=false
+
+# Exclude fixtures from language stats
+t/*.t    linguist-documentation
+t/*.pod  linguist-documentation
