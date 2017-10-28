@@ -4,3 +4,6 @@ tools/*  linguist-vendored=false
 # Exclude fixtures from language stats
 t/*.t    linguist-documentation
 t/*.pod  linguist-documentation
+
+# Fix Turing misclassification
+*.t linguist-language=Perl
