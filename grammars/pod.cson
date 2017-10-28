@@ -1,3 +1,4 @@
+# Plain old documentation
 name: "Pod"
 scopeName: "text.pod"
 patterns: [
@@ -390,102 +391,134 @@ repository:
 		contentName: "markup.raw.monospaced.pod"
 		patterns: [include: "#inline"]
 
-	
-	# Hyperlink or page reference.
-	#
-	# NOTE: To satisfy both Atom themes _and_ GitHub's fickle highlighting palette, we
-	# add an excess of scope-names. This way we grant maximum styling control to users
-	# and theme authors, yet maintain pleasing colouration when displayed on GitHub.
+
+	# L<Page reference or hyperlink>
 	inlineLink:
-		name:  "entity.name.type.instance.link.pod"
-		begin: "(L(<))(\\s*)"
+		name:  "meta.link.pod"
+		begin: "L(<)(\\s*)"
 		end:   "(\\s*)(>)|^(?==)"
 		beginCaptures:
-			1: name: "entity.name.inline.tag.begin.link.pod"
-			2: name: "punctuation.definition.link.begin.pod"
-			3: name: "invalid.illegal.syntax.leading.whitespace.pod"
+			0: name: "entity.name.type.instance.link.pod"
+			1: name: "punctuation.definition.link.angle.bracket.begin.pod"
+			2: name: "invalid.illegal.syntax.leading.whitespace.pod"
 		endCaptures:
+			0: name: "entity.name.type.instance.link.pod"
 			1: name: "invalid.illegal.syntax.trailing.whitespace.pod"
-			2: name: "punctuation.definition.link.end.pod"
+			2: name: "punctuation.definition.link.angle.bracket.end.pod"
 		patterns: [{
-			# L< …Displayed text… |
-			name: "meta.manpage.unix.link.label.pod"
-			match: "\\G((?:[^\\s|>][^|>]+)?)(\\|)"
+			# L<text|…
+			name:  "meta.label.pod"
+			match: '(?<=\\G|<)([^|>]*)(\\|)("[^"]*")?'
 			captures:
-				1: name: "constant.other.description.pod"
-				2: name: "punctuation.separator.key-value.pipe.pod"
+				1: name: "entity.name.tag.link.displayed-text.pod"
+				2: name: "punctuation.separator.link.pipe.pod"
+				3: patterns: [include: "#linkedPerldocSection"]
+			},
+			{include: "#linkedManpage"}
+			{include: "#linkedURL"}
+			{include: "#linkedPerldoc"}
+		]
+	
+	
+	# manpage(1)
+	linkedManpage:
+		name: "meta.destination.manpage.unix.pod"
+		match: """(?x) (?<=\\G|\\|)
+			([^()<>\\s]+)          # 1: Topic
+			(\\()                  # 2: (
+			([0-9])                # 3: Section number
+			(?![0-9]) (\\w{0,3})?  # 4: Section group/suffix
+			(\\))                  # 5: )
+		"""
+		captures:
+			1: name: "entity.name.instance.manpage.topic.pod"
+			2: name: "punctuation.definition.link.round.bracket.begin.pod"
+			3: name: "string.unquoted.manpage.section.number.pod"
+			4: name: "string.unquoted.manpage.section.suffix.pod"
+			5: name: "punctuation.definition.link.round.bracket.end.pod"
+	
+	
+	# L<Perldoc::Name/Section>
+	linkedPerldoc:
+		patterns: [{
+			# L<name-only>  L<text|name-only>
+			name:  "meta.destination.pod"
+			match: '(?<=\\G|<|\\|)([^|"/()<>\\s]+)(?=\\s*>)'
+			captures:
+				1: patterns: [include: "#linkedPerldocName"]
 		},{
-			# L<grep(1)> - Unix manpage link
-			include: "#manpageRef"
-		},{
-			# L<name/section> - Perl manpage link and/or possible section reference
-			name:  "entity.type.manpage.perldoc.link.pod"
-			begin: "\\G(\\/)|\\G([\\w:|]+)(\\/)?"
+			# L</section-in-same-document>
+			name:  "meta.destination.pod"
+			begin: "(?<=\\G|\\|)/"
 			end:   "(?=\\s*>)"
 			beginCaptures:
-				1: name: "punctuation.separator.slash.section.link.pod"
-				2: name: "variable.markup.underline.link.pod"
-				3: name: "punctuation.separator.slash.section.link.pod"
-			patterns: [{
-				# …/section-reference…
-				name:  "meta.manpage.section.cross-reference.link.pod"
-				begin: "\\G/"
-				end:   "(?=\\s*>)"
-				beginCaptures:
-					0: name: "punctuation.separator.slash.section.link.pod"
-				patterns: [{
-					# /…"Quoted section name"…
-					name:  "variable.markup.underline.link.pod"
-					begin: '\\G"'
-					end:   '"'
-					contentName: "string.quoted.double.section.name.link.pod"
-					beginCaptures: 0: name: "punctuation.definition.string.begin.pod"
-					endCaptures:   0: name: "punctuation.definition.string.end.pod"
-				},{
-					# /…Unquoted section…
-					name:  "variable.markup.underline.link.pod"
-					begin: '\\G\\s*([^>"\\s]+)'
-					end:   "(?=\\s*>)"
-					beginCaptures: 0: name: "string.unquoted.other.section.name.link.pod"
-					contentName:            "string.unquoted.other.section.name.link.pod"
-				}]
-			}]
+				0: name: "punctuation.definition.link.slash.pod"
+			patterns: [include: "#linkedPerldocSection"]
 		},{
-			# Fallback: underline anything we haven't already matched
-			match: "[^\\s|<>]+"
-			name: "variable.markup.underline.link.pod"
+			# L<name/section>  L<text|name/section>
+			name:  "meta.destination.pod"
+			begin: "([^|/>]+)(/)"
+			end:   "(?=\\s*>)"
+			beginCaptures:
+				1: patterns: [include: "#linkedPerldocName"]
+				2: name: "punctuation.definition.link.slash.pod"
+			patterns: [include: "#linkedPerldocSection"]
+		}]
+	
+	# Perldoc name or topic
+	linkedPerldocName:
+		name:  "meta.topic.pod"
+		begin: "(?=[^/>])"
+		end:   "(?=/|\\s*>)"
+		contentName: "entity.name.instance.topic.pod"
+		patterns: [{
+			name: "punctuation.separator.namespace.double-colon.pod"
+			match: "::"
+		}]
+	
+	# Perldoc section reference
+	linkedPerldocSection:
+		patterns: [{
+			# L</"Quoted”>
+			name:  "string.quoted.double.section.name.pod"
+			begin: '"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.pod"
+			endCaptures:   0: name: "punctuation.definition.string.end.pod"
+		},{
+			# L</Unquoted>
+			name:  "string.unquoted.section.name.pod"
+			begin: '(?=[^">])'
+			end:   "(?=\\s*>)"
 		}]
 	
 	
-	# grep(1) - Unix manual-page reference
-	manpageRef:
-		name: "entity.type.manpage.unix.link.pod"
-		match: """(?x) \\G
-			# 1: Label
-			(
-				([^\\s|][^|>]+)       # 2: Possible text-label
-				(\\|)                 # 3: Separator
-			)?
-			# 4: Destination
-			(
-				([^()<>\\s]+)         # 5: Topic
-				(\\()                 # 6: (
-				([0-9])               # 7: Section number
-				((?![0-9])\\w{0,3})?  # 8: Section group/suffix
-				(\\))                 # 9: )
-			)
-		"""
-		captures:
-			1: name: "meta.manpage.unix.link.label.pod"
-			2: name: "constant.other.description.pod"
-			3: name: "punctuation.separator.key-value.pipe.pod"
-			4: name: "meta.manpage.unix.link.destination.pod"
-			5: name: "entity.name.topic.link.pod"
-			6: name: "punctuation.definition.manpage.section.begin.link.pod"
-			7: name: "constant.numeric.integer.section.link.pod"
-			8: name: "constant.language.section.suffix.link.pod"
-			9: name: "punctuation.definition.manpage.section.end.link.pod"
-		
+	# Web link
+	linkedURL:
+		patterns: [{
+			# L<http://www.perl.org/>
+			name:  "meta.link.destination.$1.hyperlink.pod"
+			begin: "([^:/]+):(?=//)"
+			end:   "(?=\\s*>)"
+			contentName: "string.unquoted.url.pod"
+			beginCaptures:
+				0: name: "string.unquoted.url.pod"
+				1: patterns: [{
+					name: "punctuation.delimiter.string.begin.url.pod"
+					match: "\\+"
+				}]
+		},{
+			# L<scheme:uri/path>
+			name:  "meta.link.destination.$1.hyperlink.pod"
+			begin: "([-\\w]+)(:)(?=[^:>])[^\\s>]*"
+			end:   "(?=\\s*>)"
+			beginCaptures:
+				0: name: "entity.name.instance.topic.pod"
+				1: name: "storage.type.hyperlink.schema.pod"
+				2: name: "punctuation.definition.hyperlink.begin.pod"
+			contentName: "markup.underline.link.hyperlink.pod"
+		}]
+
 
 	# Hack to ignore text between a command paragraph and the next blank line
 	ignoreUntilEmptyLine:
@@ -568,3 +601,11 @@ repository:
 			name: "punctuation.leading.whitespace.pod"
 			match: "(?:^|\\G)[ \\t]+"
 		]
+
+
+# Local Variables:
+# mode: CSON
+# tab-width: 4
+# indent-tabs-mode: t
+# End:
+# vim:ts=4:noexpandtab:ft=cson:

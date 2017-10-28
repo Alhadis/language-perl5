@@ -63,9 +63,9 @@ C<drwxr-xr-x>
 
 1. Perldoc (Perl manual-pages)
 
-L<name>
+ABC L<name> XYZ
 
-L<Net::Ping>
+ABC L<Net::Ping> XYZ
 
 
 2. Unix manpages
@@ -77,7 +77,7 @@ L<crontab(5)>
 
 
 3. Unix manpages with label
-L<grok|grep(1)>
+Refer to L<the grep(1) manual page|grep(1)>
 
 L<grok|grep(7abc)>
 
@@ -112,6 +112,8 @@ L</"Object Methods">
 
 6. Perldoc with alternative text
 
+L<name>
+
 L<text|name>
 
 L<Perl Error Messages|perldiag>
@@ -125,5 +127,26 @@ L<text|/"section">
 L<text|/section>
 
 L<text|"section">
+
+L<postfix "if"|perlsyn/"Statement Modifiers">
+
+L<text|/"section">
+
+L<text|/section>
+
+L<text|"section">
+
+
+# 7. Web address
+
+L<scheme:...>
+
+L<text|scheme:path/stuff>
+
+L<https://www.perl.org/>
+
+L<The Perl Home Page|http://www.perl.org/>
+
+L<git+https://github.com/Alhadis/language-roff.git>
 
 =cut
