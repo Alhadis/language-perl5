@@ -337,15 +337,71 @@ repository:
 			4: patterns: [include: "#inline"]
 
 
-	# Markup tags for basic inline styling: **bold**, _italic_, `monospaced`, etc…
+	# Inline tags usable inside ordinary paragraphs
 	inline:
 		patterns: [
 			{include: "#inlineItalic"}
 			{include: "#inlineBold"}
 			{include: "#inlineCode"}
 			{include: "#inlineLink"}
+			{include: "#inlineEscapes"}
+			{
+				# F<filename>
+				name:  "entity.name.type.instance.pod"
+				begin: "F(<)"
+				end:   ">"
+				contentName: "markup.italic.filename.path.pod"
+				beginCaptures: 1: name: "punctuation.definition.entity.begin.pod"
+				endCaptures:   0: name: "punctuation.definition.entity.end.pod"
+			}
+			{
+				# S<text> - Disable line-wrapping
+				name:  "entity.name.type.instance.pod"
+				begin: "S(<)"
+				end:   ">"
+				beginCaptures: 1: name: "punctuation.definition.entity.begin.pod"
+				endCaptures:   0: name: "punctuation.definition.entity.end.pod"
+				contentName: "string.quoted.double.nowrap.pod"
+			}
+			{
+				# X<topic name> - Index entry
+				name:  "entity.name.type.instance.pod"
+				begin: "X(<)"
+				end:   ">"
+				beginCaptures: 1: name: "punctuation.definition.entity.begin.pod"
+				endCaptures:   0: name: "punctuation.definition.entity.end.pod"
+				contentName: "constant.other.index-entry.variable.pod"
+			}
+			{
+				# Z<> - Dummy command used for "escaping" other commands
+				name:  "constant.character.escape.null.command.pod"
+				match: "Z<>"
+			}
 		]
 
+
+	inlineEscapes:
+		patterns: [{
+			name:  "constant.character.entity.pod"
+			begin: "E(<)"
+			end:     ">"
+			beginCaptures:
+				0: name: "entity.name.type.instance.pod"
+				1: name: "punctuation.definition.entity.begin.pod"
+			endCaptures:
+				0: name: "punctuation.definition.entity.end.pod"
+			patterns: [
+				{match: "\\b(lt)\\b",              name: "entity.name.less-than.pod"}
+				{match: "\\b(gt)\\b",              name: "entity.name.greater-than.pod"}
+				{match: "\\b(verbar)\\b",          name: "entity.name.vertical-bar.pod"}
+				{match: "\\b(sol)\\b",             name: "entity.name.solidus.pod"}
+				{match: "\\G((?![0-9])\\w+)(?=>)", name: "entity.name.html-name.pod"}
+				{match: "\\G(0x[A-Fa-f0-9]+)",     name: "entity.name.codepoint.hex.pod"}
+				{match: "\\G(0[0-9]+)",            name: "entity.name.codepoint.octal.pod"}
+				{match: "\\G([1-9][0-9]*)",        name: "entity.name.codepoint.decimal.pod"}
+			]
+		}]
+	
 
 	# Oblique/slanted, emphasised, and/or italic text
 	inlineItalic:

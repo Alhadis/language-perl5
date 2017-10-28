@@ -150,3 +150,69 @@ L<The Perl Home Page|http://www.perl.org/>
 L<git+https://github.com/Alhadis/language-roff.git>
 
 =cut
+
+
+# 8. Escapes
+
+=pod
+
+E<escapes:>
+
+E<lt>         <
+
+E<gt>         >
+
+E<verbar>     |
+
+E<sol>        /
+
+E<htmlname>   eacute -> é
+
+
+E<number>     E<42>     E<-42>
+
+E<0x201E>     $#x2015;  # Hex
+
+E<075>        $#o75;    # Octal
+
+E<181>        $#181;    # Decimal
+
+NZ<><3
+
+
+
+# 9. Escapes in multiple brackets (TODO)
+
+
+
+C<$a E<lt>=E<gt> $b>
+
+C<< $a <=> $b >>
+
+C<<< $a <=> $b >>>
+C<<<<  $a <=> $b     >>>>
+
+C<< $a E<lt>=E<gt> $b >>
+
+C<<< open(X, ">>thing.dat") || die $! >>>
+C<< $foo->bar(); >>
+
+C<open(X, "E<gt>E<gt>thing.dat") || die $!>
+C<$foo-E<gt>bar();>
+
+
+
+# 10. Other Pod commands
+
+F<filename>
+
+F<.cshrc>
+
+
+ABC S<$x ? $y : $z> XYZ
+
+X<topic name>
+X<Absolutising relative URLs>
+
+
+=cut
