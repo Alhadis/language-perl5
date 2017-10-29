@@ -414,8 +414,30 @@ repository:
 		endCaptures:
 			0: name: "entity.name.inline.tag.end.italic.pod"
 			1: name: "punctuation.definition.style.italic.end.pod"
-		contentName: "markup.italic.pod"
-		patterns: [include: "#inline"]
+		patterns: [{
+			contentName: "markup.italic.pod"
+			begin: "\\G(?!<)"
+			end:   "(?=>)"
+			patterns: [include: "#inline"]
+		}, include: "#inlineItalicBrackets"]
+	
+	
+	inlineItalicBrackets:
+		begin: "\\G(<)(?=<|\\s)"
+		end:   "(?<=\\s|>)(>)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.italic.pod"
+			1: name: "punctuation.definition.style.italic.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.italic.pod"
+			1: name: "punctuation.definition.style.italic.end.pod"
+		patterns: [{
+			contentName: "markup.italic.pod"
+			begin: "(?<=<)\\s"
+			end: "\\s(?=>)"
+			patterns: [include: "#inline"]
+		}, include: "#inlineItalicBrackets"]
+
 	
 	
 	# Bold, heavy, and/or "strong" text
@@ -429,8 +451,29 @@ repository:
 		endCaptures:
 			0: name: "entity.name.inline.tag.end.bold.pod"
 			1: name: "punctuation.definition.style.bold.end.pod"
-		contentName: "markup.bold.pod"
-		patterns: [include: "#inline"]
+		patterns: [{
+			contentName: "markup.bold.pod"
+			begin: "\\G(?!<)"
+			end:   "(?=>)"
+			patterns: [include: "#inline"]
+		}, include: "#inlineBoldBrackets"]
+
+	inlineBoldBrackets:
+		begin: "\\G(<)(?=<|\\s)"
+		end:   "(?<=\\s|>)(>)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.bold.pod"
+			1: name: "punctuation.definition.style.bold.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.bold.pod"
+			1: name: "punctuation.definition.style.bold.end.pod"
+		patterns: [{
+			contentName: "markup.bold.pod"
+			begin: "(?<=<)\\s"
+			end: "\\s(?=>)"
+			patterns: [include: "#inline"]
+		}, include: "#inlineBoldBrackets"]
+
 	
 	
 	# `Monospaced type`, or so-called “code text”
@@ -444,8 +487,24 @@ repository:
 		endCaptures:
 			0: name: "entity.name.inline.tag.end.raw.monospaced.pod"
 			1: name: "punctuation.definition.style.raw.monospaced.end.pod"
-		contentName: "markup.raw.monospaced.pod"
-		patterns: [include: "#inline"]
+		patterns: [{
+			contentName: "markup.raw.monospaced.pod"
+			begin: "\\G(?!<)"
+			end:   "(?=>)"
+			patterns: [include: "#inline"]
+		}, include: "#inlineCodeBrackets"]
+	
+	inlineCodeBrackets:
+		begin: "\\G<(?=<|\\s)"
+		end:   "(?<=\\s|>)>"
+		beginCaptures: 0: name: "punctuation.definition.style.raw.monospaced.begin.pod"
+		endCaptures:   0: name: "punctuation.definition.style.raw.monospaced.end.pod"
+		patterns: [{
+			contentName: "markup.raw.monospaced.pod"
+			begin: "(?<=<)\\s"
+			end: "\\s(?=>)"
+			patterns: [include: "#inline"]
+		}, include: "#inlineCodeBrackets"]
 
 
 	# L<Page reference or hyperlink>

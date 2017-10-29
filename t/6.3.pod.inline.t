@@ -180,12 +180,34 @@ E<181>        $#181;    # Decimal
 NZ<><3
 
 
+# 9. Embedded escapes
 
-# 9. Escapes in multiple brackets (TODO)
+I<$a E<lt>=E<gt> $b>
 
-
+B<$a E<lt>=E<gt> $b>
 
 C<$a E<lt>=E<gt> $b>
+
+L<$a E<lt>=E<gt> $b>  ← TODO
+
+
+# 10. Escapes embedded between repeated angle brackets
+
+I<< $a <=> $b >>
+
+I<<< $a <=> $b >>>
+I<<<<  $a <=> $b     >>>>
+
+I<< $a E<lt>=E<gt> $b >>
+
+
+B<< $a <=> $b >>
+
+B<<< $a <=> $b >>>
+B<<<<  $a <=> $b     >>>>
+
+B<< $a E<lt>=E<gt> $b >>
+
 
 C<< $a <=> $b >>
 
@@ -194,12 +216,18 @@ C<<<<  $a <=> $b     >>>>
 
 C<< $a E<lt>=E<gt> $b >>
 
+
+
 C<<< open(X, ">>thing.dat") || die $! >>>
 C<< $foo->bar(); >>
 
 C<open(X, "E<gt>E<gt>thing.dat") || die $!>
 C<$foo-E<gt>bar();>
 
+
+	# Desired result:
+	open(X, ">>thing.dat") || die $!
+	$foo->bar();
 
 
 # 10. Other Pod commands
