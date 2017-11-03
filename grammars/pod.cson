@@ -60,7 +60,7 @@ repository:
 			# Some other command not listed in perlpod(1)
 			match: "^((=)\\S*)"
 			captures:
-				1: name: "storage.type.class.command.pod"
+				1: name: "keyword.control.other.command.pod"
 				2: name: "punctuation.definition.command.pod"
 		]
 
@@ -69,7 +69,7 @@ repository:
 	cut:
 		match: "^((=)cut)(?:\\s+\\S.*)?\\s*$"
 		captures:
-			1: name: "storage.type.class.cut.pod"
+			1: name: "keyword.control.cut.pod"
 			2: name: "punctuation.section.end.pod"
 
 
@@ -107,7 +107,7 @@ repository:
 	encoding:
 		match: "^((=)encoding)(?:\\s+(\\S.*)?)\\s*$"
 		captures:
-			1: name: "storage.type.class.encoding.pod"
+			1: name: "keyword.control.encoding.pod"
 			2: name: "punctuation.definition.command.pod"
 			3: name: "entity.name.type.instance.encoding-type.pod"
 
@@ -148,11 +148,11 @@ repository:
 			begin: "^((=)begin)\\s+(html)(?=\\s|$)"
 			end:   "^((=)end)\\s+(html)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.begin.pod"
+				1: name: "keyword.control.format.begin.pod"
 				2: name: "punctuation.section.format.begin.pod"
 				3: name: "entity.name.type.instance.pod"
 			endCaptures:
-				1: name: "storage.type.class.format.end.pod"
+				1: name: "keyword.control.format.end.pod"
 				2: name: "punctuation.section.format.end.pod"
 				3: name: "entity.name.type.instance.pod"
 			patterns: [
@@ -173,11 +173,11 @@ repository:
 			begin: "^((=)begin)\\s+(roff|man)(?=\\s|$)"
 			end:   "^((=)end)\\s+(\\3)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.begin.pod"
+				1: name: "keyword.control.format.begin.pod"
 				2: name: "punctuation.section.format.begin.pod"
 				3: name: "entity.name.type.instance.pod"
 			endCaptures:
-				1: name: "storage.type.class.format.end.pod"
+				1: name: "keyword.control.format.end.pod"
 				2: name: "punctuation.section.format.end.pod"
 				3: name: "entity.name.type.instance.pod"
 			patterns: [
@@ -198,11 +198,11 @@ repository:
 			begin: "^((=)begin)\\s+(latex)(?=\\s|$)"
 			end:   "^((=)end)\\s+(latex)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.begin.pod"
+				1: name: "keyword.control.format.begin.pod"
 				2: name: "punctuation.section.format.begin.pod"
 				3: name: "entity.name.type.instance.pod"
 			endCaptures:
-				1: name: "storage.type.class.format.end.pod"
+				1: name: "keyword.control.format.end.pod"
 				2: name: "punctuation.section.format.end.pod"
 				3: name: "entity.name.type.instance.pod"
 			patterns: [
@@ -223,11 +223,11 @@ repository:
 			begin: "^((=)begin)\\s+(tex)(?=\\s|$)"
 			end:   "^((=)end)\\s+(tex)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.begin.pod"
+				1: name: "keyword.control.format.begin.pod"
 				2: name: "punctuation.section.format.begin.pod"
 				3: name: "entity.name.type.instance.pod"
 			endCaptures:
-				1: name: "storage.type.class.format.end.pod"
+				1: name: "keyword.control.format.end.pod"
 				2: name: "punctuation.section.format.end.pod"
 				3: name: "entity.name.type.instance.pod"
 			patterns: [
@@ -248,11 +248,11 @@ repository:
 			begin: "^((=)begin)\\s+(text)(?=\\s|$)"
 			end:   "^((=)end)\\s+(text)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.begin.pod"
+				1: name: "keyword.control.format.begin.pod"
 				2: name: "punctuation.section.format.begin.pod"
 				3: name: "entity.name.type.instance.pod"
 			endCaptures:
-				1: name: "storage.type.class.format.end.pod"
+				1: name: "keyword.control.format.end.pod"
 				2: name: "punctuation.section.format.end.pod"
 				3: name: "entity.name.type.instance.pod"
 			patterns: [
@@ -272,7 +272,7 @@ repository:
 			name:  "meta.embedded-pod.format.block.pod"
 			match: "^((=)(begin|end))\\s+((:)\\S+)"
 			captures:
-				1: name: "storage.type.class.format.$3.pod"
+				1: name: "keyword.control.format.$3.pod"
 				2: name: "punctuation.section.format.$3.pod"
 				4: name: "entity.name.type.instance.pod"
 				5: name: "punctuation.separator.colon.format.pod"
@@ -283,11 +283,11 @@ repository:
 			begin: "^((=)begin)\\s+((?!:)\\S+)"
 			end:   "^((=)end)\\s+(\\3)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.begin.pod"
+				1: name: "keyword.control.format.begin.pod"
 				2: name: "punctuation.section.format.begin.pod"
 				3: name: "entity.name.type.instance.pod"
 			endCaptures:
-				1: name: "storage.type.class.format.end.pod"
+				1: name: "keyword.control.format.end.pod"
 				2: name: "punctuation.section.format.end.pod"
 				3: name: "entity.name.type.instance.pod"
 			contentName: "meta.output.format.pod"
@@ -303,7 +303,7 @@ repository:
 			begin: "^((=)for)\\s+(html)(?=\\s|$)\\s*"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.pod"
+				1: name: "keyword.control.format.pod"
 				2: name: "punctuation.section.format.pod"
 				3: name: "entity.name.type.instance.pod"
 			contentName:  "meta.output.format.pod"
@@ -315,7 +315,7 @@ repository:
 			begin: "^((=)for)\\s+(roff|man)(?=\\s|$)\\s*"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.pod"
+				1: name: "keyword.control.format.pod"
 				2: name: "punctuation.section.format.pod"
 				3: name: "entity.name.type.instance.pod"
 			contentName:  "meta.output.format.pod"
@@ -326,7 +326,7 @@ repository:
 			begin: "^((=)for)\\s+(latex)(?=\\s|$)\\s*"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.pod"
+				1: name: "keyword.control.format.pod"
 				2: name: "punctuation.section.format.pod"
 				3: name: "entity.name.type.instance.pod"
 			contentName:  "meta.output.format.pod"
@@ -337,7 +337,7 @@ repository:
 			begin: "^((=)for)\\s+(tex)(?=\\s|$)\\s*"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.pod"
+				1: name: "keyword.control.format.pod"
 				2: name: "punctuation.section.format.pod"
 				3: name: "entity.name.type.instance.pod"
 			contentName: "meta.output.format.pod"
@@ -348,7 +348,7 @@ repository:
 			begin: "^((=)for)\\s+(text)(?=\\s|$)\\s*"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.pod"
+				1: name: "keyword.control.format.pod"
 				2: name: "punctuation.section.format.pod"
 				3: name: "entity.name.type.instance.pod"
 			contentName: "meta.output.format.pod"
@@ -359,7 +359,7 @@ repository:
 			begin: "^((=)for)\\s+(comment)(?=\\s|$)"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.pod"
+				1: name: "keyword.control.format.pod"
 				2: name: "punctuation.section.format.pod"
 				3: name: "entity.name.type.instance.pod"
 			contentName: "constant.other.ignored-text.pod"
@@ -369,7 +369,7 @@ repository:
 			begin: "^((=)for)\\s+((:)\\S+)(?=\\s|$)"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.pod"
+				1: name: "keyword.control.format.pod"
 				2: name: "punctuation.section.format.pod"
 				3: name: "entity.name.type.instance.pod"
 				4: name: "punctuation.separator.colon.format.pod"
@@ -380,7 +380,7 @@ repository:
 			begin: "^((=)for)\\s+((?!:)\\S+)(?=\\s|$)"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.format.begin.pod"
+				1: name: "keyword.control.format.begin.pod"
 				2: name: "punctuation.section.format.begin.pod"
 				3: name: "entity.name.type.instance.pod"
 			contentName: "meta.output.format.pod"
@@ -393,7 +393,7 @@ repository:
 		begin: "^((=)head([1-4]))(?:\\s+(\\S.*))?\\s*$"
 		end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 		beginCaptures:
-			1: name: "storage.type.class.heading.pod"
+			1: name: "keyword.control.heading.pod"
 			2: name: "punctuation.definition.heading.pod"
 			4: patterns: [include: "#inlineTags"]
 
@@ -648,7 +648,7 @@ repository:
 			begin: "^((=)item)\\s+(\\d+\\.)(?=\\s|$)"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.list.pod"
+				1: name: "keyword.control.list.pod"
 				2: name: "punctuation.definition.list.pod"
 				3: name: "variable.ordered.list.pod"
 			patterns: [include: "#inlineTags"]
@@ -658,7 +658,7 @@ repository:
 			begin: "^((=)item)\\s+(\\d+\\.)(?=\\s|$)"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.list.pod"
+				1: name: "keyword.control.list.pod"
 				2: name: "punctuation.definition.list.pod"
 				3: name: "variable.unordered.list.pod"
 			patterns: [include: "#inlineTags"]
@@ -668,7 +668,7 @@ repository:
 			begin: "^((=)item)(?=\\s|$)"
 			end:   "^(?=\\s*$)|^(?==cut(?:\\s|$))"
 			beginCaptures:
-				1: name: "storage.type.class.list.pod"
+				1: name: "keyword.control.list.pod"
 				2: name: "punctuation.definition.list.pod"
 			patterns: [include: "#inlineTags"]
 		}]
@@ -720,11 +720,11 @@ repository:
 		begin: "^((=)over)(?:\\s+(\\S.*))?\\s*$"
 		end:   "^((=)back)(?:\\b.*$)|^(?==cut(?:\\s|$))"
 		beginCaptures:
-			1: name: "storage.type.class.list.begin.pod"
+			1: name: "keyword.control.list.begin.pod"
 			2: name: "punctuation.section.list.begin.pod"
 			3: name: "constant.language.numeric.indent-level.pod"
 		endCaptures:
-			1: name: "storage.type.class.list.end.pod"
+			1: name: "keyword.control.list.end.pod"
 			2: name: "punctuation.section.list.end.pod"
 		patterns: [include: "text.pod"]
 

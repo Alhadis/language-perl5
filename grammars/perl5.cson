@@ -179,10 +179,11 @@ repository:
 	
 	# Embedded Pod source
 	pod:
-		name: "comment.block.documentation.pod"
+		name: "comment.block.documentation.perl"
 		begin: "^(?==)"
 		end:   "^(=cut)(?:\\s+\\S.*)?\\s*$"
 		patterns: [include: "text.pod"]
+		contentName: "meta.embedded.pod"
 		endCaptures:
 			1: patterns: [include: "text.pod"]
 		
