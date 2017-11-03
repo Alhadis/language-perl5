@@ -9,15 +9,53 @@ patterns: [
 
 repository:
 
+	# B<Emboldened text>
+	bold:
+		name:  "entity.name.type.instance.pod"
+		begin: "B(<)"
+		end:   "(>)|^(?==)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.bold.pod"
+			1: name: "punctuation.definition.style.bold.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.bold.pod"
+			1: name: "punctuation.definition.style.bold.end.pod"
+		patterns: [{
+			contentName: "markup.bold.pod"
+			begin: "\\G(?!<)"
+			end:   "(?=>)"
+			patterns: [include: "#inlineTags"]
+		}, include: "#boldBrackets"]
+
+
+	# B<<<< … >>>>
+	boldBrackets:
+		begin: "\\G(<)(?=<|\\s)"
+		end:   "(?<=\\s|>)(>)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.bold.pod"
+			1: name: "punctuation.definition.style.bold.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.bold.pod"
+			1: name: "punctuation.definition.style.bold.end.pod"
+		patterns: [{
+			contentName: "markup.bold.pod"
+			begin: "(?<=<)\\s"
+			end: "\\s(?=>)"
+			patterns: [include: "#inlineTags"]
+		}, include: "#boldBrackets"]
+
+
 	# Command paragraphs: =[…name]
 	commands:
 		patterns: [
 			{include: "#heading"}
 			{include: "#encoding"}
 			{include: "#overhang"}
-			{include: "#list"}
+			{include: "#listItem"}
 			{include: "#formatBlocks"}
 			{include: "#formatLines"}
+			{include: "#cut"}
 			
 			# Some other command not listed in perlpod(1)
 			match: "^((=)\\S*)"
@@ -27,7 +65,7 @@ repository:
 		]
 
 
-	# End Pod: =cut
+	# EOF marker: =cut
 	cut:
 		match: "^((=)cut)(?:\\s+\\S.*)?\\s*$"
 		captures:
@@ -42,17 +80,17 @@ repository:
 		captures:
 			0: patterns: [include: "text.html.basic"]
 
-	embedRoff:
-		name:  "text.embedded.roff"
-		match: "(?:^|\\n|\\G)\\s*(\\S.*)$\\n?"
-		captures:
-			0: patterns: [include: "text.roff"]
-
 	embedLatex:
 		name:  "text.embedded.latex"
 		match: "(?:^|\\n|\\G)\\s*(\\S.*)$\\n?"
 		captures:
 			0: patterns: [include: "text.tex.latex"]
+
+	embedRoff:
+		name:  "text.embedded.roff"
+		match: "(?:^|\\n|\\G)\\s*(\\S.*)$\\n?"
+		captures:
+			0: patterns: [include: "text.roff"]
 
 	embedTex:
 		name:  "text.embedded.tex"
@@ -72,6 +110,29 @@ repository:
 			1: name: "storage.type.class.encoding.pod"
 			2: name: "punctuation.definition.command.pod"
 			3: name: "entity.name.type.instance.encoding-type.pod"
+
+
+	# Character entity references; perlpod(1) calls them "escapes"
+	entities:
+		name:  "constant.character.entity.pod"
+		begin: "E(<)"
+		end:   "(>)"
+		beginCaptures:
+			0: name: "entity.name.type.instance.pod"
+			1: name: "punctuation.definition.entity.begin.pod"
+		endCaptures:
+			0: name: "entity.name.type.instance.pod"
+			1: name: "punctuation.definition.entity.end.pod"
+		patterns: [
+			{match: "\\b(lt)\\b",              name: "entity.name.less-than.pod"}
+			{match: "\\b(gt)\\b",              name: "entity.name.greater-than.pod"}
+			{match: "\\b(verbar)\\b",          name: "entity.name.vertical-bar.pod"}
+			{match: "\\b(sol)\\b",             name: "entity.name.solidus.pod"}
+			{match: "\\G((?![0-9])\\w+)(?=>)", name: "entity.name.html-name.pod"}
+			{match: "\\G(0x[A-Fa-f0-9]+)",     name: "entity.name.codepoint.hex.pod"}
+			{match: "\\G(0[0-9]+)",            name: "entity.name.codepoint.octal.pod"}
+			{match: "\\G([1-9][0-9]*)",        name: "entity.name.codepoint.decimal.pod"}
+		]
 
 
 	# Embedded region of text/code/data.
@@ -334,17 +395,23 @@ repository:
 		beginCaptures:
 			1: name: "storage.type.class.heading.pod"
 			2: name: "punctuation.definition.heading.pod"
-			4: patterns: [include: "#inline"]
+			4: patterns: [include: "#inlineTags"]
+
+
+	# Hack to ignore text between a command paragraph and the next blank line
+	ignoreUntilEmptyLine:
+		begin: "\\G"
+		end: "(?<=^)(?=\\s*$)"
 
 
 	# Inline tags usable inside ordinary paragraphs
-	inline:
+	inlineTags:
 		patterns: [
-			{include: "#inlineItalic"}
-			{include: "#inlineBold"}
-			{include: "#inlineCode"}
-			{include: "#inlineLink"}
-			{include: "#inlineEscapes"}
+			{include: "#italic"}
+			{include: "#bold"}
+			{include: "#monospace"}
+			{include: "#link"}
+			{include: "#entities"}
 			{
 				# F<filename>
 				name:  "entity.name.type.instance.pod"
@@ -380,31 +447,9 @@ repository:
 		]
 
 
-	inlineEscapes:
-		patterns: [{
-			name:  "constant.character.entity.pod"
-			begin: "E(<)"
-			end:     ">"
-			beginCaptures:
-				0: name: "entity.name.type.instance.pod"
-				1: name: "punctuation.definition.entity.begin.pod"
-			endCaptures:
-				0: name: "punctuation.definition.entity.end.pod"
-			patterns: [
-				{match: "\\b(lt)\\b",              name: "entity.name.less-than.pod"}
-				{match: "\\b(gt)\\b",              name: "entity.name.greater-than.pod"}
-				{match: "\\b(verbar)\\b",          name: "entity.name.vertical-bar.pod"}
-				{match: "\\b(sol)\\b",             name: "entity.name.solidus.pod"}
-				{match: "\\G((?![0-9])\\w+)(?=>)", name: "entity.name.html-name.pod"}
-				{match: "\\G(0x[A-Fa-f0-9]+)",     name: "entity.name.codepoint.hex.pod"}
-				{match: "\\G(0[0-9]+)",            name: "entity.name.codepoint.octal.pod"}
-				{match: "\\G([1-9][0-9]*)",        name: "entity.name.codepoint.decimal.pod"}
-			]
-		}]
-	
 
-	# Oblique/slanted, emphasised, and/or italic text
-	inlineItalic:
+	# Oblique, italic or emphasised text
+	italic:
 		name:  "entity.name.type.instance.pod"
 		begin: "I(<)"
 		end:   "(>)|^(?==)"
@@ -418,11 +463,12 @@ repository:
 			contentName: "markup.italic.pod"
 			begin: "\\G(?!<)"
 			end:   "(?=>)"
-			patterns: [include: "#inline"]
-		}, include: "#inlineItalicBrackets"]
+			patterns: [include: "#inlineTags"]
+		}, include: "#italicBrackets"]
 	
 	
-	inlineItalicBrackets:
+	# I<<<< … >>>>
+	italicBrackets:
 		begin: "\\G(<)(?=<|\\s)"
 		end:   "(?<=\\s|>)(>)"
 		beginCaptures:
@@ -435,80 +481,13 @@ repository:
 			contentName: "markup.italic.pod"
 			begin: "(?<=<)\\s"
 			end: "\\s(?=>)"
-			patterns: [include: "#inline"]
-		}, include: "#inlineItalicBrackets"]
+			patterns: [include: "#inlineTags"]
+		}, include: "#italicBrackets"]
 
 	
-	
-	# Bold, heavy, and/or "strong" text
-	inlineBold:
-		name:  "entity.name.type.instance.pod"
-		begin: "B(<)"
-		end:   "(>)|^(?==)"
-		beginCaptures:
-			0: name: "entity.name.inline.tag.begin.bold.pod"
-			1: name: "punctuation.definition.style.bold.begin.pod"
-		endCaptures:
-			0: name: "entity.name.inline.tag.end.bold.pod"
-			1: name: "punctuation.definition.style.bold.end.pod"
-		patterns: [{
-			contentName: "markup.bold.pod"
-			begin: "\\G(?!<)"
-			end:   "(?=>)"
-			patterns: [include: "#inline"]
-		}, include: "#inlineBoldBrackets"]
-
-	inlineBoldBrackets:
-		begin: "\\G(<)(?=<|\\s)"
-		end:   "(?<=\\s|>)(>)"
-		beginCaptures:
-			0: name: "entity.name.inline.tag.begin.bold.pod"
-			1: name: "punctuation.definition.style.bold.begin.pod"
-		endCaptures:
-			0: name: "entity.name.inline.tag.end.bold.pod"
-			1: name: "punctuation.definition.style.bold.end.pod"
-		patterns: [{
-			contentName: "markup.bold.pod"
-			begin: "(?<=<)\\s"
-			end: "\\s(?=>)"
-			patterns: [include: "#inline"]
-		}, include: "#inlineBoldBrackets"]
-
-	
-	
-	# `Monospaced type`, or so-called “code text”
-	inlineCode:
-		name:  "entity.name.type.instance.pod"
-		begin: "C(<)"
-		end:   "(>)|^(?==)"
-		beginCaptures:
-			0: name: "entity.name.inline.tag.begin.raw.monospaced.pod"
-			1: name: "punctuation.definition.style.raw.monospaced.begin.pod"
-		endCaptures:
-			0: name: "entity.name.inline.tag.end.raw.monospaced.pod"
-			1: name: "punctuation.definition.style.raw.monospaced.end.pod"
-		patterns: [{
-			contentName: "markup.raw.monospaced.pod"
-			begin: "\\G(?!<)"
-			end:   "(?=>)"
-			patterns: [include: "#inline"]
-		}, include: "#inlineCodeBrackets"]
-	
-	inlineCodeBrackets:
-		begin: "\\G<(?=<|\\s)"
-		end:   "(?<=\\s|>)>"
-		beginCaptures: 0: name: "punctuation.definition.style.raw.monospaced.begin.pod"
-		endCaptures:   0: name: "punctuation.definition.style.raw.monospaced.end.pod"
-		patterns: [{
-			contentName: "markup.raw.monospaced.pod"
-			begin: "(?<=<)\\s"
-			end: "\\s(?=>)"
-			patterns: [include: "#inline"]
-		}, include: "#inlineCodeBrackets"]
-
 
 	# L<Page reference or hyperlink>
-	inlineLink:
+	link:
 		name:  "meta.link.pod"
 		begin: "L(<)(\\s*)"
 		end:   "(\\s*)(>)|^(?==)"
@@ -520,6 +499,29 @@ repository:
 			0: name: "entity.name.type.instance.link.pod"
 			1: name: "invalid.illegal.syntax.trailing.whitespace.pod"
 			2: name: "punctuation.definition.link.angle.bracket.end.pod"
+		patterns: [
+			{include: "#linkBrackets"}
+			{include: "#linkContents"}
+		]
+	
+	
+	linkBrackets:
+		begin: "\\G(<)(?=<|\\s)"
+		end:   "(?<=\\s|>)(>)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.bold.pod"
+			1: name: "punctuation.definition.style.bold.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.bold.pod"
+			1: name: "punctuation.definition.style.bold.end.pod"
+		patterns: [{
+			begin: "(?<=<)\\s"
+			end:   "\\s(?=>)"
+			patterns: [include: "#inlineTags"]
+		}, include: "#linkBrackets"]
+	
+	
+	linkContents:
 		patterns: [{
 			# L<text|…
 			name:  "meta.label.pod"
@@ -527,13 +529,14 @@ repository:
 			captures:
 				1: name: "entity.name.tag.link.displayed-text.pod"
 				2: name: "punctuation.separator.link.pipe.pod"
-				3: patterns: [include: "#linkedPerldocSection"]
+				3: patterns: [include: "#linkSection"]
 			},
 			{include: "#linkedManpage"}
 			{include: "#linkedURL"}
 			{include: "#linkedPerldoc"}
 		]
-	
+
+
 	
 	# manpage(1)
 	linkedManpage:
@@ -560,7 +563,7 @@ repository:
 			name:  "meta.destination.pod"
 			match: '(?<=\\G|<|\\|)([^|"/()<>\\s]+)(?=\\s*>)'
 			captures:
-				1: patterns: [include: "#linkedPerldocName"]
+				1: patterns: [include: "#linkName"]
 		},{
 			# L</section-in-same-document>
 			name:  "meta.destination.pod"
@@ -568,43 +571,16 @@ repository:
 			end:   "(?=\\s*>)"
 			beginCaptures:
 				0: name: "punctuation.definition.link.slash.pod"
-			patterns: [include: "#linkedPerldocSection"]
+			patterns: [include: "#linkSection"]
 		},{
 			# L<name/section>  L<text|name/section>
 			name:  "meta.destination.pod"
 			begin: "([^|/>]+)(/)"
 			end:   "(?=\\s*>)"
 			beginCaptures:
-				1: patterns: [include: "#linkedPerldocName"]
+				1: patterns: [include: "#linkName"]
 				2: name: "punctuation.definition.link.slash.pod"
-			patterns: [include: "#linkedPerldocSection"]
-		}]
-	
-	# Perldoc name or topic
-	linkedPerldocName:
-		name:  "meta.topic.pod"
-		begin: "(?=[^/>])"
-		end:   "(?=/|\\s*>)"
-		contentName: "entity.name.instance.topic.pod"
-		patterns: [{
-			name: "punctuation.separator.namespace.double-colon.pod"
-			match: "::"
-		}]
-	
-	# Perldoc section reference
-	linkedPerldocSection:
-		patterns: [{
-			# L</"Quoted”>
-			name:  "string.quoted.double.section.name.pod"
-			begin: '"'
-			end:   '"'
-			beginCaptures: 0: name: "punctuation.definition.string.begin.pod"
-			endCaptures:   0: name: "punctuation.definition.string.end.pod"
-		},{
-			# L</Unquoted>
-			name:  "string.unquoted.section.name.pod"
-			begin: '(?=[^">])'
-			end:   "(?=\\s*>)"
+			patterns: [include: "#linkSection"]
 		}]
 	
 	
@@ -633,16 +609,39 @@ repository:
 				2: name: "punctuation.definition.hyperlink.begin.pod"
 			contentName: "markup.underline.link.hyperlink.pod"
 		}]
-
-
-	# Hack to ignore text between a command paragraph and the next blank line
-	ignoreUntilEmptyLine:
-		begin: "\\G"
-		end: "(?<=^)(?=\\s*$)"
-
+	
+	
+	# Perldoc name/topic
+	linkName:
+		name:  "meta.topic.pod"
+		begin: "(?=[^/>])"
+		end:   "(?=/|\\s*>)"
+		contentName: "entity.name.instance.topic.pod"
+		patterns: [{
+			name: "punctuation.separator.namespace.double-colon.pod"
+			match: "::"
+		}]
+	
+	
+	# Perldoc section reference
+	linkSection:
+		patterns: [{
+			# L</"Quoted”>
+			name:  "string.quoted.double.section.name.pod"
+			begin: '"'
+			end:   '"'
+			beginCaptures: 0: name: "punctuation.definition.string.begin.pod"
+			endCaptures:   0: name: "punctuation.definition.string.end.pod"
+		},{
+			# L</Unquoted>
+			name:  "string.unquoted.section.name.pod"
+			begin: '(?=[^">])'
+			end:   "(?=\\s*>)"
+		}]
+	
 
 	# List item: =item
-	list:
+	listItem:
 		patterns: [{
 			# =item 1. Numbered
 			name:  "markup.list.numbered.pod"
@@ -652,7 +651,7 @@ repository:
 				1: name: "storage.type.class.list.pod"
 				2: name: "punctuation.definition.list.pod"
 				3: name: "variable.ordered.list.pod"
-			patterns: [include: "#inline"]
+			patterns: [include: "#inlineTags"]
 		},{
 			# =item * Bulleted
 			name:  "markup.list.unnumbered.pod"
@@ -662,7 +661,7 @@ repository:
 				1: name: "storage.type.class.list.pod"
 				2: name: "punctuation.definition.list.pod"
 				3: name: "variable.unordered.list.pod"
-			patterns: [include: "#inline"]
+			patterns: [include: "#inlineTags"]
 		},{
 			# =item Anything else
 			name:  "markup.list.other.pod"
@@ -671,8 +670,45 @@ repository:
 			beginCaptures:
 				1: name: "storage.type.class.list.pod"
 				2: name: "punctuation.definition.list.pod"
-			patterns: [include: "#inline"]
+			patterns: [include: "#inlineTags"]
 		}]
+	
+	
+	# C<Constant-width/preformatted text>
+	monospace:
+		name:  "entity.name.type.instance.pod"
+		begin: "C(<)"
+		end:   "(>)|^(?==)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.raw.monospaced.pod"
+			1: name: "punctuation.definition.style.raw.monospaced.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.raw.monospaced.pod"
+			1: name: "punctuation.definition.style.raw.monospaced.end.pod"
+		patterns: [{
+			contentName: "markup.raw.monospaced.pod"
+			begin: "\\G(?!<)"
+			end:   "(?=>)"
+			patterns: [include: "#inlineTags"]
+		}, include: "#monospaceBrackets"]
+	
+	
+	# C<<<< … >>>>
+	monospaceBrackets:
+		begin: "\\G(<)(?=<|\\s)"
+		end:   "(?<=\\s|>)(>)"
+		beginCaptures:
+			0: name: "entity.name.inline.tag.begin.raw.monospaced.pod"
+			1: name: "punctuation.definition.style.raw.monospaced.begin.pod"
+		endCaptures:
+			0: name: "entity.name.inline.tag.end.raw.monospaced.pod"
+			1: name: "punctuation.definition.style.raw.monospaced.end.pod"
+		patterns: [{
+			contentName: "markup.raw.monospaced.pod"
+			begin: "(?<=<)\\s"
+			end:   "\\s(?=>)"
+			patterns: [include: "#inlineTags"]
+		}, include: "#monospaceBrackets"]
 	
 	
 	# Overhanging list or indented paragraph
@@ -693,18 +729,21 @@ repository:
 		patterns: [include: "text.pod"]
 
 
-	# Fallback highlighting for arguments to unrecognised commands
-	params:
-		name: "variable.other.parameter.argument.pod"
-		match: "\\S+"
-
 
 	# Ordinary text block
 	paragraph:
 		name:  "markup.paragraph.pod"
 		begin: "^(?=[^\\s=])|^\\s+(?=\\S)"
 		end:   "^(?=\\s*$)"
-		patterns: [include: "#inline"]
+		patterns: [include: "#inlineTags"]
+
+
+
+	# Fallback highlighting for arguments to unrecognised commands
+	params:
+		name: "variable.other.parameter.argument.pod"
+		match: "\\S+"
+
 
 
 	# Indented text block, representing "verbatim" text (à la, Markdown)

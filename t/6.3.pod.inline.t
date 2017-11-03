@@ -222,12 +222,15 @@ C<<< open(X, ">>thing.dat") || die $! >>>
 C<< $foo->bar(); >>
 
 C<open(X, "E<gt>E<gt>thing.dat") || die $!>
-C<$foo-E<gt>bar();>
+C<$foo-E<gt>bar();>1
 
 
 	# Desired result:
 	open(X, ">>thing.dat") || die $!
 	$foo->bar();
+
+
+L<<<<  ABC E<lt>hr E<sol>E<gt> XYZ|grep  >>>>
 
 
 # 10. Other Pod commands
