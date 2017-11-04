@@ -67,6 +67,20 @@ ABC L<name> XYZ
 
 ABC L<Net::Ping> XYZ
 
+ABC L<nE<0x61>meZ<>me> XYZ
+
+ABC L<< nE<0x61>mZ<>e >> XYZ
+
+ABC L<NeE<0x74>::PinE<0x67>> XYZ
+
+ABC L<<< NoZ<>>> >>>   XYZ
+
+ABC L<<<  NoZ>>>   >>>
+
+ABC L<NEZ< aaa><gt>et::Ping> XYZ
+
+ABC L<NEZ<><gt>et::Ping> XYZ
+
 
 2. Unix manpages
 L<grep(1)>
@@ -75,9 +89,13 @@ L<grep(7abc)>
 
 L<crontab(5)>
 
+L<grep tE<0x74>hat text|grE<0x74>p(1)>
+
+L<grE<0x65>p(7abc)>
+
 
 3. Unix manpages with label
-Refer to L<the grep(1) manual page|grep(1)>
+Refer to L<thE<75> grep(1) manual page|grep(1)>
 
 L<grok|grep(7abc)>
 
@@ -188,7 +206,7 @@ B<$a E<lt>=E<gt> $b>
 
 C<$a E<lt>=E<gt> $b>
 
-L<$a E<lt>=E<gt> $b>  ← TODO
+L<$a E<lt>=E<gt> $b>
 
 
 # 10. Escapes embedded between repeated angle brackets

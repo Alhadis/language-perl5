@@ -114,25 +114,41 @@ repository:
 
 	# Character entity references; perlpod(1) calls them "escapes"
 	entities:
-		name:  "constant.character.entity.pod"
-		begin: "E(<)"
-		end:   "(>)"
-		beginCaptures:
-			0: name: "entity.name.type.instance.pod"
-			1: name: "punctuation.definition.entity.begin.pod"
-		endCaptures:
-			0: name: "entity.name.type.instance.pod"
-			1: name: "punctuation.definition.entity.end.pod"
-		patterns: [
-			{match: "\\b(lt)\\b",              name: "entity.name.less-than.pod"}
-			{match: "\\b(gt)\\b",              name: "entity.name.greater-than.pod"}
-			{match: "\\b(verbar)\\b",          name: "entity.name.vertical-bar.pod"}
-			{match: "\\b(sol)\\b",             name: "entity.name.solidus.pod"}
-			{match: "\\G((?![0-9])\\w+)(?=>)", name: "entity.name.html-name.pod"}
-			{match: "\\G(0x[A-Fa-f0-9]+)",     name: "entity.name.codepoint.hex.pod"}
-			{match: "\\G(0[0-9]+)",            name: "entity.name.codepoint.octal.pod"}
-			{match: "\\G([1-9][0-9]*)",        name: "entity.name.codepoint.decimal.pod"}
-		]
+		patterns: [{
+			name:  "constant.character.entity.pod"
+			begin: "(E(<))((?:Z<[^>]*>)*)"
+			end:   "(\\s*)((?:Z<[^>]*>)*)((>))"
+			beginCaptures:
+				1: name: "entity.name.type.instance.pod"
+				2: name: "punctuation.definition.entity.begin.pod"
+				3: patterns: [include: "#zeroEffect"]
+			endCaptures:
+				1: name: "invalid.illegal.syntax.trailing.whitespace.pod"
+				2: patterns: [include: "#zeroEffect"]
+				3: name: "entity.name.type.instance.pod"
+				4: name: "punctuation.definition.entity.end.pod"
+			patterns: [
+				{match: "lt",                      name: "entity.name.less-than.pod"}
+				{match: "gt",                      name: "entity.name.greater-than.pod"}
+				{match: "verbar",                  name: "entity.name.vertical-bar.pod"}
+				{match: "sol",                     name: "entity.name.solidus.pod"}
+				{match: "\\G((?![0-9])\\w+)(?=>)", name: "entity.name.html-name.pod"}
+				{match: "\\G(0x[A-Fa-f0-9]+)",     name: "entity.name.codepoint.hex.pod"}
+				{match: "\\G(0[0-9]+)",            name: "entity.name.codepoint.octal.pod"}
+				{match: "\\G([1-9][0-9]*)",        name: "entity.name.codepoint.decimal.pod"}
+				{match: "\\G\\s+",                 name: "invalid.illegal.syntax.leading.whitespace.pod"}
+				{match: "\\s+",                    name: "invalid.illegal.syntax.whitespace.pod"}
+				{match: "(?:[^\\s>Z]|Z(?!<))+",    name: "invalid.illegal.syntax.unknown-escape.pod"}
+				
+				# Highlight Z<> as invalid when surrounded by unexpected characters
+				match: "(?:(Z(<)(>))|(Z<[^>]*>))(?!>)"
+				captures:
+					1: name: "invalid.illegal.escape.syntax.pod"
+					2: name: "punctuation.definition.escape.begin.pod"
+					3: name: "punctuation.definition.escape.end.pod"
+					4: patterns: [include: "#zeroEffect"]
+			]
+		}, include: "#zeroEffect"]
 
 
 	# Embedded region of text/code/data.
@@ -439,11 +455,6 @@ repository:
 				endCaptures:   0: name: "punctuation.definition.entity.end.pod"
 				contentName: "constant.other.index-entry.variable.pod"
 			}
-			{
-				# Z<> - Dummy command used for "escaping" other commands
-				name:  "constant.character.escape.null.command.pod"
-				match: "Z<>"
-			}
 		]
 
 
@@ -509,15 +520,15 @@ repository:
 		begin: "\\G(<)(?=<|\\s)"
 		end:   "(?<=\\s|>)(>)"
 		beginCaptures:
-			0: name: "entity.name.inline.tag.begin.bold.pod"
-			1: name: "punctuation.definition.style.bold.begin.pod"
+			0: name: "entity.name.inline.tag.begin.link.pod"
+			1: name: "punctuation.definition.style.link.begin.pod"
 		endCaptures:
-			0: name: "entity.name.inline.tag.end.bold.pod"
-			1: name: "punctuation.definition.style.bold.end.pod"
+			0: name: "entity.name.inline.tag.end.link.pod"
+			1: name: "punctuation.definition.style.link.end.pod"
 		patterns: [{
 			begin: "(?<=<)\\s"
 			end:   "\\s(?=>)"
-			patterns: [include: "#inlineTags"]
+			patterns: [include: "#linkContents"]
 		}, include: "#linkBrackets"]
 	
 	
@@ -525,12 +536,13 @@ repository:
 		patterns: [{
 			# L<text|…
 			name:  "meta.label.pod"
-			match: '(?<=\\G|<)([^|>]*)(\\|)("[^"]*")?'
+			match: '(?<=\\G|<)((?:E<[^>]*>|Z<>|[^|>]*)*)(\\|)("[^"]*")?'
 			captures:
-				1: name: "entity.name.tag.link.displayed-text.pod"
+				1: name: "entity.name.tag.link.displayed-text.pod", patterns: [include: "#entities"]
 				2: name: "punctuation.separator.link.pipe.pod"
 				3: patterns: [include: "#linkSection"]
 			},
+			{include: "#entities"}
 			{include: "#linkedManpage"}
 			{include: "#linkedURL"}
 			{include: "#linkedPerldoc"}
@@ -542,14 +554,14 @@ repository:
 	linkedManpage:
 		name: "meta.destination.manpage.unix.pod"
 		match: """(?x) (?<=\\G|\\|)
-			([^()<>\\s]+)          # 1: Topic
+			([^/()\\s]+)           # 1: Topic
 			(\\()                  # 2: (
 			([0-9])                # 3: Section number
 			(?![0-9]) (\\w{0,3})?  # 4: Section group/suffix
 			(\\))                  # 5: )
 		"""
 		captures:
-			1: name: "entity.name.instance.manpage.topic.pod"
+			1: name: "entity.name.instance.manpage.topic.pod", patterns: [include: "#entities"]
 			2: name: "punctuation.definition.link.round.bracket.begin.pod"
 			3: name: "string.unquoted.manpage.section.number.pod"
 			4: name: "string.unquoted.manpage.section.suffix.pod"
@@ -561,7 +573,7 @@ repository:
 		patterns: [{
 			# L<name-only>  L<text|name-only>
 			name:  "meta.destination.pod"
-			match: '(?<=\\G|<|\\|)([^|"/()<>\\s]+)(?=\\s*>)'
+			match: "(?<=\\G|<|\\|)((?:E<[^>]*>|Z<>|[^<|>\\s]+|\\s+[^\\s>])*)(?=\\s*>)"
 			captures:
 				1: patterns: [include: "#linkName"]
 		},{
@@ -613,14 +625,16 @@ repository:
 	
 	# Perldoc name/topic
 	linkName:
-		name:  "meta.topic.pod"
-		begin: "(?=[^/>])"
-		end:   "(?=/|\\s*>)"
-		contentName: "entity.name.instance.topic.pod"
 		patterns: [{
-			name: "punctuation.separator.namespace.double-colon.pod"
-			match: "::"
-		}]
+			name:  "meta.topic.pod"
+			begin: "(?=[^/<>]|[EZ]<)"
+			end:   "(?=/|\\s*>)"
+			contentName: "entity.name.instance.topic.pod"
+			patterns: [{
+				name: "punctuation.separator.namespace.double-colon.pod"
+				match: "::"
+			}, include: "#entities"]
+		}, include: "#entities"]
 	
 	
 	# Perldoc section reference
@@ -632,11 +646,13 @@ repository:
 			end:   '"'
 			beginCaptures: 0: name: "punctuation.definition.string.begin.pod"
 			endCaptures:   0: name: "punctuation.definition.string.end.pod"
+			patterns: [include: "#entities"]
 		},{
 			# L</Unquoted>
 			name:  "string.unquoted.section.name.pod"
 			begin: '(?=[^">])'
 			end:   "(?=\\s*>)"
+			patterns: [include: "#entities"]
 		}]
 	
 
@@ -755,6 +771,27 @@ repository:
 			name: "punctuation.leading.whitespace.pod"
 			match: "(?:^|\\G)[ \\t]+"
 		]
+
+
+	# Z<> - Dummy command used for "escaping" other commands
+	zeroEffect:
+		patterns: [{
+			name: "invalid.illegal.escape.syntax.pod"
+			begin: "Z(<)(?=[^>]|$)"
+			end:   "(>)|$"
+			beginCaptures: 1: name: "punctuation.definition.escape.begin.pod"
+			endCaptures:   0: name: "punctuation.definition.escape.end.pod"
+			patterns: [
+				match: "\\s+"
+				name: "invalid.illegal.syntax.whitespace.pod"
+			]
+		},{
+			name:  "constant.character.escape.null.command.pod"
+			match: "Z(<)(>)"
+			captures:
+				1: name: "punctuation.definition.escape.begin.pod"
+				2: name: "punctuation.definition.escape.end.pod"
+		}]
 
 
 # Local Variables:
