@@ -75,11 +75,8 @@ ABC L<NeE<0x74>::PinE<0x67>> XYZ
 
 ABC L<<< NoZ<>>> >>>   XYZ
 
-ABC L<<<  NoZ>>>   >>>
-
-ABC L<NEZ< aaa><gt>et::Ping> XYZ
-
-ABC L<NEZ<><gt>et::Ping> XYZ
+ABC L<<< KKK|NoZ >>>/section  >>>
+ABC L<<< KKK|NoZ >>>/"section"  >>>
 
 
 2. Unix manpages

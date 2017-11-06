@@ -571,11 +571,14 @@ repository:
 	# L<Perldoc::Name/Section>
 	linkedPerldoc:
 		patterns: [{
-			# L<name-only>  L<text|name-only>
+			# L<name/section>
 			name:  "meta.destination.pod"
-			match: "(?<=\\G|<|\\|)((?:E<[^>]*>|Z<>|[^<|>\\s]+|\\s+[^\\s>])*)(?=\\s*>)"
-			captures:
+			begin: "([^|/]+)(/)"
+			end:   "(?=\\s*>)"
+			beginCaptures:
 				1: patterns: [include: "#linkName"]
+				2: name: "punctuation.definition.link.slash.pod"
+			patterns: [include: "#linkSection"]
 		},{
 			# L</section-in-same-document>
 			name:  "meta.destination.pod"
@@ -585,14 +588,11 @@ repository:
 				0: name: "punctuation.definition.link.slash.pod"
 			patterns: [include: "#linkSection"]
 		},{
-			# L<name/section>  L<text|name/section>
+			# L<name-only>
 			name:  "meta.destination.pod"
-			begin: "([^|/>]+)(/)"
-			end:   "(?=\\s*>)"
-			beginCaptures:
+			match: "(?<=\\G|<|\\|)((?:[EZ]<[^>]*>|[^<|>\\s]+|\\s+[^\\s>])*)(?=\\s*>)"
+			captures:
 				1: patterns: [include: "#linkName"]
-				2: name: "punctuation.definition.link.slash.pod"
-			patterns: [include: "#linkSection"]
 		}]
 	
 	
